@@ -69,7 +69,8 @@
   <form method="dialog" id="show-form" class="stack">
     <h2 id="show-dialog-title">Show</h2>
     <label>Date <input type="date" name="date" required></label>
-    <label>Date shown on the site <small>(optional, e.g. "Summer 2026" when the exact day isn't set)</small><input name="dateLabel"></label>
+    <label class="check"><input type="checkbox" id="vague-date"> The exact date isn't set yet</label>
+    <label id="date-label-field" hidden>Show this instead of the date <small>(e.g. "Summer 2027" or "Late August")</small><input name="dateLabel" placeholder="Summer 2027"></label>
     <label>Time <small>(optional)</small><input name="time" placeholder="8:00 pm"></label>
     <label>Title / event <input name="title" required placeholder="Troy Night Out"></label>
     <label>Venue and city <input name="place" placeholder="Lark Hall, Albany, NY"></label>

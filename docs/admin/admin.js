@@ -138,6 +138,8 @@ function openShow(index) {
   editing = { index, draft: structuredClone(src) };
   const f = $("#show-form");
   for (const name of ["date", "dateLabel", "time", "title", "place", "text"]) f.elements[name].value = editing.draft[name] || "";
+  $("#vague-date").checked = !!editing.draft.dateLabel;
+  $("#date-label-field").hidden = !editing.draft.dateLabel;
   $("#show-dialog-title").textContent = index == null ? "Add a show" : "Edit show";
   $("#delete-show").hidden = index == null;
   $("#show-error").textContent = "";
@@ -154,6 +156,10 @@ function renderShowLinks() {
       h("input", { type: "url", placeholder: "https://…", value: l.url || "", oninput: (e) => (l.url = e.target.value) }),
       h("button", { type: "button", class: "icon", "aria-label": "Remove link", onclick: () => { links.splice(i, 1); renderShowLinks(); } }, "✕"))));
 }
+$("#vague-date").addEventListener("change", (e) => {
+  $("#date-label-field").hidden = !e.target.checked;
+  if (!e.target.checked) $("#show-form").elements.dateLabel.value = "";
+});
 $("#add-link").addEventListener("click", () => { editing.draft.links.push({ label: "", url: "" }); renderShowLinks(); });
 
 function renderShowPhotos() {
@@ -392,7 +398,7 @@ async function watchBuild(sha) {
       const run = runs[0];
       if (run?.status === "completed") {
         return updateBar(run.conclusion === "success"
-          ? "Live on the site now. Refresh it to see your changes."
+          ? "Live now. If the site still looks old, refresh it (Ctrl+F5 on a computer) or wait a few minutes."
           : "The site update failed. Your changes are saved; tell Mark so he can take a look.");
       }
     } catch {
