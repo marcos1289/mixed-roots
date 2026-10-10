@@ -9,7 +9,7 @@
 <link rel="canonical" href="https://www.mixedrootsnewyork.com/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Mixed Roots: AfroBeat &amp; Reggae">
-<meta property="og:description" content="A band that plays exotic grooves mixed with danceable beats. Albany, New York.">
+<meta property="og:description" content="{{tagline}} Albany, New York.">
 <meta property="og:url" content="https://www.mixedrootsnewyork.com/">
 <meta property="og:image" content="{{og_image}}">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -18,10 +18,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Space+Grotesk:wght@500;700&display=swap">
 <link rel="stylesheet" href="style.css">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"MusicGroup","name":"Mixed Roots","genre":["AfroBeat","Reggae"],
- "url":"https://www.mixedrootsnewyork.com/","email":"MixedRootsNewYork@gmail.com",
- "foundingLocation":{"@type":"Place","name":"Albany, New York"},
- "sameAs":["https://www.facebook.com/Mixed-Roots-Reggae-1337569189643533/","https://music.youtube.com/channel/UCyPiesgdO8TSPQgSf3rXtSA"]}
+{{json_ld}}
 </script>
 </head>
 <body>
@@ -39,7 +36,7 @@
   <div class="hero-text">
     <p class="eyebrow">Albany, New York</p>
     <h1>Mixed Roots</h1>
-    <p class="hero-sub">A band that plays exotic grooves mixed with danceable beats.</p>
+    <p class="hero-sub">{{tagline}}</p>
     <div class="hero-actions">
       <a class="button" href="#booking">Book the band</a>
       <a class="button ghost" href="#videos">Watch &amp; listen</a>
@@ -52,19 +49,12 @@
 <section class="section band" id="band">
   <div>
     <p class="eyebrow">The band</p>
-    <h2>Global citizen musicians.</h2>
-    <p class="lead">We share a hip set of pieces from Africa, America, and places in between.</p>
-    <p>Under the leadership of the drummer, George, Mixed Roots is a rare breed of band. Its members come from different places and now call Albany, New York home. Together, the band plays with energy that comes from their mixed roots, and they are excited to share their styles with you.</p>
-    <p class="motto">Music is love. One love.</p>
+    <h2>{{band_heading}}</h2>
+    <p class="lead">{{band_lead}}</p>
+    {{band_text}}
+    <p class="motto">{{motto}}</p>
   </div>
-  <ul class="lineup">
-    <li><strong>George</strong><span>Lead drums &amp; vocals</span><p>Grew up in Accra, Ghana, learning traditional African beats, and shares his vocabulary of AfroBeat and reggae.</p></li>
-    <li><strong>Gideon</strong><span>Keys</span><p>Melts the keys with chordal structures influenced by his Nigerian upbringing.</p></li>
-    <li><strong>Seth</strong><span>Hand drums</span><p>Showing his Ghanaian roots, he drives danceable beats on the hand drums.</p></li>
-    <li><strong>Brian</strong><span>Bass</span><p>Plays with several upstate New York reggae groups and brings flavors from the Grateful Dead and others.</p></li>
-    <li><strong>Pete</strong><span>Guitar</span><p>Decades of playing reggae, rock, and all places in between.</p></li>
-    <li><strong>Dillon &amp; Catherine</strong><span>Saxophone &amp; trombone</span><p>The horn section adds local flavor while keeping respect for their worldly interests.</p></li>
-  </ul>
+  <ul class="lineup">{{lineup}}</ul>
 </section>
 
 <section class="section shows-home" id="shows">
@@ -80,10 +70,7 @@
 <section class="section videos" id="videos">
   <div class="section-head">
     <div><p class="eyebrow">Watch &amp; listen</p><h2>Better live.</h2></div>
-    <p class="links">
-      <a class="text-link" href="https://music.youtube.com/channel/UCyPiesgdO8TSPQgSf3rXtSA" target="_blank" rel="noopener">YouTube Music ↗</a>
-      <a class="text-link" href="https://vimeo.com/1016538628" target="_blank" rel="noopener">Vimeo ↗</a>
-    </p>
+    <p class="links">{{media_links}}</p>
   </div>
   <div class="video-row">{{videos}}</div>
 </section>
@@ -104,20 +91,16 @@
   <div class="booking-inner">
     <p class="eyebrow">Booking</p>
     <h2>Bring Mixed Roots to your event.</h2>
-    <p>Venues, festivals, private parties, community events. Send inquiries to the band; we'd love to hear from you!</p>
-    <a class="button light" href="mailto:MixedRootsNewYork@gmail.com?subject=Mixed%20Roots%20booking%20inquiry">Email the band</a>
-    <p class="email">MixedRootsNewYork@gmail.com</p>
+    <p>{{booking_text}}</p>
+    <a class="button light" href="mailto:{{email}}?subject=Mixed%20Roots%20booking%20inquiry">Email the band</a>
+    <p class="email">{{email}}</p>
   </div>
 </section>
 </main>
 
 <footer class="site-footer">
   <a class="brand" href="./">Mixed Roots<span>Albany, New York</span></a>
-  <nav aria-label="Elsewhere">
-    <a href="https://www.facebook.com/Mixed-Roots-Reggae-1337569189643533/" target="_blank" rel="noopener">Facebook</a>
-    <a href="https://music.youtube.com/channel/UCyPiesgdO8TSPQgSf3rXtSA" target="_blank" rel="noopener">YouTube Music</a>
-    <a href="mailto:MixedRootsNewYork@gmail.com">Email</a>
-  </nav>
+  <nav aria-label="Elsewhere">{{footer_links}}</nav>
   <p>© {{year}} Mixed Roots</p>
 </footer>
 

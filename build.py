@@ -3,8 +3,10 @@
 
     python3 build.py
 
-Content lives in content/*.json, page templates and styles in src/.
-Photos come from recovery/media/photos and are resized, re-encoded and
+Content lives in content/*.json (edited by hand or through the /admin page),
+page templates and styles in src/. Photos named "uploads/<file>" live in
+content/photos/ (added through the admin page); all others come from
+recovery/media/photos. Every photo is resized, re-encoded and
 stripped of metadata (phone photos can carry GPS coordinates). Videos are
 re-encoded with ffmpeg. Both are cached, so re-runs only redo new files.
 """
@@ -21,6 +23,7 @@ from PIL import Image, ImageOps
 ROOT = Path(__file__).resolve().parent
 OUT = ROOT / "docs"
 PHOTOS = ROOT / "recovery/media/photos"
+UPLOADS = ROOT / "content/photos"
 VIDEOS = ROOT / "recovery/media/video"
 SRC = ROOT / "src"
 DOMAIN = "www.mixedrootsnewyork.com"
@@ -40,14 +43,19 @@ def slug(name):
     return re.sub(r"[^a-z0-9]+", "-", Path(name).name.lower()).strip("-")
 
 
-def photo(name):
-    """Resize one recovered photo to every width in WIDTHS; return its metadata."""
-    src = PHOTOS / name.replace("background-images/", "backgrounds/")
-    with Image.open(src) as im:
+def photo_source(name):
+    if name.startswith("uploads/"):
+        return UPLOADS / name.removeprefix("uploads/")
+    return PHOTOS / name.replace("background-images/", "backgrounds/")
+
+
+def photo(name, widths=WIDTHS):
+    """Resize one photo to each of widths; return its metadata."""
+    with Image.open(photo_source(name)) as im:
         im = ImageOps.exif_transpose(im).convert("RGB")
         w, h = im.size
         out = {}
-        for target in WIDTHS:
+        for target in widths:
             tw = min(target, w)
             dest = OUT / "img" / f"{slug(name)}-{target}.jpg"
             if not dest.exists():
@@ -55,8 +63,20 @@ def photo(name):
                     dest, "JPEG", quality=80, optimize=True, progressive=True)
             WRITTEN.add(dest.name)
             out[target] = (f"img/{dest.name}", tw)
+    if 1600 not in out:
+        return {"small": out[640][0]}
     return {"small": out[640][0], "large": out[1600][0], "w": w, "h": h,
             "srcset": f"{out[640][0]} {out[640][1]}w, {out[1600][0]} {out[1600][1]}w"}
+
+
+def safe_url(url):
+    if not re.match(r"(https?://|mailto:)", url or ""):
+        raise SystemExit(f"Refusing link that isn't http(s) or mailto: {url!r}")
+    return e(url)
+
+
+def ext_link(label, url, arrow=""):
+    return f'<a href="{safe_url(url)}" target="_blank" rel="noopener">{e(label)}{arrow}</a>'
 
 
 def img_tag(p, alt, sizes, cls="", lazy=True):
@@ -104,8 +124,9 @@ def show_entry(s, with_media=True):
     parts = [f'<article class="show" id="{s["date"]}-{slug(s["title"])}">',
              f'<p class="show-date"><time datetime="{s["date"]}">{e(show_date(s))}</time></p>',
              f'<h3>{e(s["title"])}</h3>']
-    if s.get("place"):
-        parts.append(f'<p class="show-place">{e(s["place"])}</p>')
+    if s.get("place") or s.get("time"):
+        where = " · ".join(x for x in (s.get("time"), s.get("place")) if x)
+        parts.append(f'<p class="show-place">{e(where)}</p>')
     if s.get("text"):
         parts.append(f'<p>{e(s["text"])}</p>')
     if with_media and s.get("photos"):
@@ -116,8 +137,7 @@ def show_entry(s, with_media=True):
         parts.append(video(s["video"]))
     if s.get("links"):
         parts.append('<p class="show-links">' + " ".join(
-            f'<a href="{e(l["url"])}" target="_blank" rel="noopener">{e(l["label"])} ↗</a>'
-            for l in s["links"]) + "</p>")
+            ext_link(l["label"], l["url"], " ↗") for l in s["links"]) + "</p>")
     parts.append("</article>")
     return "".join(parts)
 
@@ -142,22 +162,46 @@ def render(template, **values):
     (OUT / template).write_text(text)
 
 
+def validate(shows, gallery):
+    for s in shows:
+        datetime.date.fromisoformat(s.get("date", ""))
+        if not s.get("title"):
+            raise SystemExit(f"Show on {s['date']} has no title")
+        for f in s.get("photos", []):
+            if not photo_source(f).exists():
+                raise SystemExit(f"Show {s['title']!r}: photo {f} not found")
+    for g in gallery:
+        if not photo_source(g["file"]).exists():
+            raise SystemExit(f"Gallery photo {g['file']} not found")
+
+
+def library():
+    """Thumbnails of every available photo, for the admin page's photo picker."""
+    files = sorted((f"uploads/{p.name}" for p in UPLOADS.glob("*.jpg")), reverse=True) if UPLOADS.exists() else []
+    files += sorted(str(p.relative_to(PHOTOS)).replace("backgrounds/", "background-images/")
+                    for p in PHOTOS.rglob("*") if p.suffix.lower() in (".jpg", ".jpeg", ".png"))
+    return [{"file": f, "thumb": photo(f, (640,))["small"]} for f in files]
+
+
 def main():
     (OUT / "img").mkdir(parents=True, exist_ok=True)
     (OUT / "video").mkdir(exist_ok=True)
+    site = json.loads((ROOT / "content/site.json").read_text())
     shows = sorted(json.loads((ROOT / "content/shows.json").read_text()),
                    key=lambda s: s["date"], reverse=True)
     gallery = json.loads((ROOT / "content/gallery.json").read_text())
+    validate(shows, gallery)
     today = datetime.date.today().isoformat()
     upcoming = [s for s in reversed(shows) if s["date"] >= today]
     past = [s for s in shows if s["date"] < today]
+    links = site["links"]
+    facebook = next((l["url"] for l in links if "facebook.com" in l["url"]), None)
 
     if upcoming:
         upcoming_html = "".join(show_entry(s, with_media=False) for s in upcoming)
     else:
-        upcoming_html = ('<p class="empty">No dates are posted right now. New shows go up here '
-                         'and on <a href="https://www.facebook.com/Mixed-Roots-Reggae-1337569189643533/" '
-                         'target="_blank" rel="noopener">Facebook</a>.</p>')
+        upcoming_html = '<p class="empty">No dates are posted right now. New shows go up here' + (
+            f' and on {ext_link("Facebook", facebook)}.</p>' if facebook else ".</p>")
 
     years = {}
     for s in past:
@@ -169,24 +213,46 @@ def main():
 
     hero = photo("background-images/603193851.jpeg")
     roots = photo("background-images/1473576544.png")
-    common = {"year": str(datetime.date.today().year)}
+    footer_links = "".join(ext_link(l["label"], l["url"]) for l in links) + \
+        f'<a href="mailto:{e(site["email"])}">Email</a>'
+    json_ld = json.dumps({
+        "@context": "https://schema.org", "@type": "MusicGroup", "name": "Mixed Roots",
+        "genre": ["AfroBeat", "Reggae"], "url": f"https://{DOMAIN}/", "email": site["email"],
+        "foundingLocation": {"@type": "Place", "name": "Albany, New York"},
+        "sameAs": [l["url"] for l in links]}).replace("</", "<\\/")
+    common = {"year": str(datetime.date.today().year), "footer_links": footer_links,
+              "show_count": str(len(past)), "first_year": past[-1]["date"][:4]}
 
     render("index.html",
+           json_ld=f'<script type="application/ld+json">{json_ld}</script>',
            hero_img=img_tag(hero, "Mixed Roots on stage", "100vw", lazy=False),
            roots_img=roots["large"],
            og_image=f'https://{DOMAIN}/{hero["large"]}',
+           tagline=e(site["tagline"]),
+           band_heading=e(site["bandHeading"]),
+           band_lead=e(site["bandLead"]),
+           band_text="".join(f"<p>{e(x)}</p>" for x in site["bandText"].split("\n") if x.strip()),
+           motto=e(site["motto"]),
+           lineup="".join(f'<li><strong>{e(m["name"])}</strong><span>{e(m["role"])}</span>'
+                          f'<p>{e(m.get("bio", ""))}</p></li>' for m in site["lineup"]),
+           booking_text=e(site["bookingText"]),
+           email=e(site["email"]),
+           media_links="".join(ext_link(l["label"], l["url"], " ↗").replace("<a ", '<a class="text-link" ', 1)
+                               for l in links if l["url"] != facebook),
            upcoming=upcoming_html,
            recent="".join(recent_card(s) for s in [s for s in past if s.get("photos")][:3]),
-           show_count=str(len(past)),
-           first_year=past[-1]["date"][:4],
            videos="".join(video(k) for k in VIDEO_INFO),
-           gallery="".join(thumb(g["file"], g["caption"], "(max-width: 600px) 50vw, (max-width: 1000px) 33vw, 25vw")
+           gallery="".join(f'<figure>{thumb(g["file"], g.get("caption", ""), "(max-width: 600px) 50vw, (max-width: 1000px) 33vw, 25vw")}'
+                           + (f'<figcaption>{e(g["caption"])}</figcaption>' if g.get("caption") else "") + "</figure>"
                            for g in gallery),
            **common)
-    render("shows.html", archive=archive, year_nav=year_nav, show_count=str(len(past)),
-           first_year=past[-1]["date"][:4], **common)
+    render("shows.html", archive=archive, year_nav=year_nav, **common)
     for f in ("style.css", "app.js", "favicon.svg"):
         shutil.copy2(SRC / f, OUT / f)
+    (OUT / "admin").mkdir(exist_ok=True)
+    for f in (SRC / "admin").iterdir():
+        shutil.copy2(f, OUT / "admin" / f.name)
+    (OUT / "admin" / "library.json").write_text(json.dumps(library()))
     (OUT / "CNAME").write_text(DOMAIN + "\n")
     (OUT / ".nojekyll").write_text("")
 

@@ -1,0 +1,22 @@
+{
+  "tagline": "A band that plays exotic grooves mixed with danceable beats.",
+  "bandHeading": "Global citizen musicians.",
+  "bandLead": "We share a hip set of pieces from Africa, America, and places in between.",
+  "bandText": "Under the leadership of the drummer, George, Mixed Roots is a rare breed of band. Its members come from different places and now call Albany, New York home. Together, the band plays with energy that comes from their mixed roots, and they are excited to share their styles with you.",
+  "motto": "Music is love. One love.",
+  "lineup": [
+    {"name": "George", "role": "Lead drums & vocals", "bio": "Grew up in Accra, Ghana, learning traditional African beats, and shares his vocabulary of AfroBeat and reggae."},
+    {"name": "Gideon", "role": "Keys", "bio": "Melts the keys with chordal structures influenced by his Nigerian upbringing."},
+    {"name": "Seth", "role": "Hand drums", "bio": "Showing his Ghanaian roots, he drives danceable beats on the hand drums."},
+    {"name": "Brian", "role": "Bass", "bio": "Plays with several upstate New York reggae groups and brings flavors from the Grateful Dead and others."},
+    {"name": "Pete", "role": "Guitar", "bio": "Decades of playing reggae, rock, and all places in between."},
+    {"name": "Dillon & Catherine", "role": "Saxophone & trombone", "bio": "The horn section adds local flavor while keeping respect for their worldly interests."}
+  ],
+  "bookingText": "Venues, festivals, private parties, community events. Send inquiries to the band; we'd love to hear from you!",
+  "email": "MixedRootsNewYork@gmail.com",
+  "links": [
+    {"label": "Facebook", "url": "https://www.facebook.com/Mixed-Roots-Reggae-1337569189643533/"},
+    {"label": "YouTube Music", "url": "https://music.youtube.com/channel/UCyPiesgdO8TSPQgSf3rXtSA"},
+    {"label": "Vimeo", "url": "https://vimeo.com/1016538628"}
+  ]
+}

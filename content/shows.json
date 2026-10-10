@@ -1,115 +1,405 @@
 [
-  {"date": "2025-10-25", "title": "Harvest Fest", "place": "Poughkeepsie Farm Project, Poughkeepsie, NY",
-   "text": "What a blast! We had fun at Poughkeepsie Farm Project's Harvest Fest, celebrating the power of urban farming. It was great to share the space with amazing vendors and performers.",
-   "photos": ["poughkeepsie-farm-fest-thank-you-2025.jpg", "poughkeepsie-farm-fest.png"]},
-  {"date": "2025-08-24", "title": "Trail day, trio set", "place": "With Mohawk Hudson Land Conservancy",
-   "text": "Thank you for letting us fill your trail needs as a trio version of Mixed Roots. Rainy Sunday August 24 was fantastic even with the mud. Extra thanks to the great, motivated volunteers from Mohawk Hudson Land Conservancy."},
-  {"date": "2025-08-21", "title": "Shepard Park", "place": "Lake George, NY",
-   "text": "Thank you to all of the dancers, listeners, watchers, and supporters at Shepard Park, Lake George. We had a blast. Thank you, Lake George, for the fireworks over the lake after!",
-   "photos": ["lake-george-2025-august-21.jpg"]},
-  {"date": "2025-06-27", "title": "Troy Night Out", "place": "Troy, NY",
-   "text": "Troy Night Out was fantastic! Thank you to all the Caribbean American Heritage Month supporters, dancers, and listeners.",
-   "video": "troy_night_out_-_mixed_roots_502"},
-  {"date": "2025-05-03", "dateLabel": "May 2025", "title": "Battenkill Fly Fishing Festival", "place": "Arlington, VT",
-   "text": "Thank you to the Arlington, Vermont Fly Fishing Festival! We had a great time. Glad to see our listeners dancing.",
-   "photos": ["p88.png"], "links": [{"label": "Festival site", "url": "https://www.vtflyfest.com/saturday-2025"}]},
-  {"date": "2025-02-21", "title": "Troy pop-up with Oobleck", "place": "Weathered Wood, Troy, NY",
-   "text": "Thank you for sharing a new venue with our friends of Oobleck!",
-   "photos": ["oobleck-2-2025.jpg"]},
-  {"date": "2025-01-15", "dateLabel": "Winter 2025", "title": "Lark Hall", "place": "Albany, NY",
-   "text": "We thank Lark Hall here in Albany for hosting us twice in the snow. We appreciated the warm vibes from our audience, especially those dancing!",
-   "photos": ["frankie-action-lark-hall.jpeg", "img-7505.jpg", "img-7507.jpg"]},
-  {"date": "2024-12-20", "title": "The Eleven @ Lark Hall", "place": "Albany, NY",
-   "text": "We absolutely loved playing for you at The Eleven @ Lark Hall. To all a Happy New Year! The best is yet to come. One love."},
-  {"date": "2024-11-08", "title": "Park Theater", "place": "723 Warren St., Hudson, NY",
-   "text": "Thank you to all who came out to Park Theater Hudson!",
-   "photos": ["october-2024-promo-for-11-8-24.jpg"], "links": [{"label": "Watch on Vimeo", "url": "https://vimeo.com/1016538628"}]},
-  {"date": "2024-04-03", "title": "Albany Center Gallery", "place": "Albany, NY",
-   "photos": ["p92.png"]},
-  {"date": "2023-11-19", "title": "Celebrate Asylum benefit dinner", "place": "First Lutheran Church, Albany, NY",
-   "text": "A fundraising dinner to support local asylum seekers, hosted by Capital District Border Watch.",
-   "photos": ["p89.png"], "links": [{"label": "Times Union coverage", "url": "https://www.timesunion.com/faith/article/albany-church-site-benefit-asylum-seekers-18494689.php"}]},
-  {"date": "2023-10-29", "title": "October dance night", "place": "",
-   "text": "Thank you to all who danced with us. It was a pleasure enjoying the good vibes."},
-  {"date": "2023-06-18", "title": "Dad Fest", "place": "Washington Park, Albany, NY"},
-  {"date": "2023-06-16", "title": "Reggae Night", "place": "Stable Gate Winery, Castleton, NY"},
-  {"date": "2023-05-20", "title": "Albany Pine Bush", "place": "Albany, NY", "text": "Thank you for seeing us in May!"},
-  {"date": "2023-05-13", "title": "Northampton", "place": "Northampton, MA"},
-  {"date": "2023-03-05", "title": "The Linda", "place": "WAMC Performing Arts Studio, Albany, NY",
-   "text": "Originally scheduled for February 12, then March 5 at 3:00 pm. Thank you all for enjoying our performance, supported by New York FolkLife. Special shout-out to the dancers!"},
-  {"date": "2022-11-20", "title": "Westminster Commons", "place": "Albany, NY",
-   "text": "Thank you to Albany's Westminster Commons for having us play for the first of many more gatherings to come. The Sunday before Thanksgiving was awesome."},
-  {"date": "2022-10-02", "title": "FolkFest", "place": "Washington Park, Albany, NY",
-   "text": "Thanks for checking out the FolkFest hosted by New York Folklore. We were blessed to perform after a tremendously diverse set of talented performers. Dance! Listen! Enjoy the vibes!",
-   "photos": ["p106.png"]},
-  {"date": "2022-07-24", "title": "Stable Gate Farm and Winery", "place": "Castleton, NY", "text": "Thanks for dancing with us!"},
-  {"date": "2021-10-31", "title": "Hallowine Block Party", "place": "Stable Gate Winery, Castleton, NY",
-   "photos": ["p82.jpeg"]},
-  {"date": "2021-10-30", "title": "Illuminate: Masquerade", "place": "Hudson Candy Factory, Troy, NY",
-   "text": "Thank you for checking us out at the end of October!", "photos": ["p85.png"]},
-  {"date": "2021-10-03", "title": "Folklore Fest", "place": "Washington Park, Albany, NY",
-   "text": "The first weekend of October we played Capital Wine again on Friday, and we were featured in the inaugural Folklore Fest at Washington Park on Sunday. It was great to see so much of our community there!"},
-  {"date": "2021-07-11", "title": "Opening for The Big Takeover", "place": "Earth Sky Time, Manchester, VT",
-   "text": "We were invited to open for The Big Takeover. Earth Sky Time hosted the show. We always look forward to seeing you dance. Music is love. One love.",
-   "links": [{"label": "The Big Takeover", "url": "https://bigtakeoverband.com"}]},
-  {"date": "2021-06-30", "title": "Alive at Five", "place": "Corning Preserve, Albany, NY",
-   "text": "Thank you to the City of Albany for having us open the first Alive at Five since the pandemic. It was great to play, and we wish the sun had shone more. Keep The Meditations in mind: their sound check was fantastic, and we were sad they were rained out.",
-   "photos": ["p79.png"]},
-  {"date": "2021-05-15", "dateLabel": "May 2021", "title": "Opening for Dr. Jah and the Love Prophets", "place": "",
-   "text": "Sharing the night with other local reggae enthusiasts, we opened for Dr. Jah and the Love Prophets to welcome summer."},
-  {"date": "2020-10-31", "title": "Pandemic Halloween", "place": "Stable Gate Winery, Castleton, NY",
-   "text": "We enjoyed the spooky day from 3 to 8 pm with Glass Pony, another indie rock band in the Capital District."},
-  {"date": "2020-09-12", "title": "Stable Gate residency", "place": "Stable Gate Farm and Winery, Castleton, NY",
-   "text": "Our residency continued July 18, August 8, and September 12. It's always a pleasure to play with such great sun, such great people, and such great vibes."},
-  {"date": "2020-06-06", "title": "Stable Gate Winery", "place": "Castleton, NY",
-   "text": "Celebrating the world of post-pandemic possibilities."},
-  {"date": "2020-02-16", "title": "Skyloft, with Robanic", "place": "Albany, NY",
-   "text": "Thank you to Skyloft for hosting Robanic and Mixed Roots on Sunday evening. It's always a treat to bring reggae to new venues. Keep dancing!",
-   "photos": ["p76.png"]},
-  {"date": "2020-02-16", "title": "Perfect Blend Winter Series", "place": "",
-   "text": "Perfect Blend's Winter Series hosted the (semi) acoustic version of Mixed Roots that morning. With hand drums, guitar, and vocals, Kofi and Pete kept the vibe for morning coffee drinkers.",
-   "photos": ["p77.png"]},
-  {"date": "2019-11-01", "title": "Umana", "place": "Albany, NY",
-   "text": "Thanks for dancing the night away! Your first Friday of the month was filled with danceable beats and eclectically exotic flavor."},
-  {"date": "2019-09-20", "title": "Opening for The Elovaters", "place": "Rustic Barn Pub, Troy, NY",
-   "text": "What a night! Thank you to all who came out and danced!"},
-  {"date": "2019-07-15", "dateLabel": "Summer 2019", "title": "Lunchtime music series", "place": "Empire State Plaza, Albany, NY",
-   "text": "Mixed Roots played under the second of four agency buildings during lunch for State workers, neighbors, friends, and local onlookers. Sharing our sound was a pleasure all around.",
-   "photos": ["p73.png"]},
-  {"date": "2019-06-09", "title": "Opening for The Big Takeover", "place": "Earth Sky Time, Manchester, VT",
-   "text": "The energy was amazing. Thank you to all who came out and enjoyed the fresh night.",
-   "photos": ["p71_1.png"]},
-  {"date": "2018-12-29", "title": "Franklin Alley Social Club, first anniversary", "place": "Troy, NY",
-   "text": "It was a blast. Hope all of the dancers and shuffleboarders had a great time!",
-   "photos": ["p158.png", "p155.png"]},
-  {"date": "2018-11-17", "title": "Umana's fifth anniversary", "place": "Albany, NY",
-   "text": "We had the amazing opportunity to share the fifth anniversary celebration with Umana.",
-   "photos": ["p152.png"]},
-  {"date": "2018-10-20", "title": "Snug Harbor", "place": "New Paltz, NY",
-   "text": "Special thanks to RootBrew for hosting us at Snug Harbor. It was a pleasure to play for a very welcoming audience filled with reggae fans!"},
-  {"date": "2018-10-12", "title": "Umana", "place": "Albany, NY",
-   "text": "Danceable AfroBeat and reggae from 8 to 10 pm. We hope to come again to share the beats, share the vibes, and have you dance your night away."},
-  {"date": "2018-10-05", "title": "Parish Public House, with Mosaic Foundation", "place": "Albany, NY",
-   "text": "Parish Public House hosted Mosaic Foundation and had us open the stage and warm up the dance floor."},
-  {"date": "2018-07-19", "title": "Alive at Five, opening for Third World", "place": "Albany, NY",
-   "text": "Mixed Roots graced the City of Albany with AfroBeat and reggae, opening for Grammy-nominated, world-renowned Third World. We enjoyed the sun as it approached 96 degrees in the shade. After the show a few of us got to take photos with Third World.",
-   "photos": ["p99.png", "p100.png"]},
-  {"date": "2018-07-13", "title": "Albany Public Library", "place": "Main Branch, 161 Washington Ave., Albany, NY",
-   "text": "Connecting with our community is always fun. Bringing AfroBeat and reggae all around the Northeast is our pleasure.",
-   "photos": ["p96.png"]},
-  {"date": "2018-06-16", "title": "Franklin Alley Social Club", "place": "Troy, NY",
-   "text": "The social club expanded into the alley it is named for, and we enjoyed the sun and shade, danced, and played simultaneously. Photo credit to Heather, our guitarist's wife.",
-   "photos": ["p94.png"]},
-  {"date": "2018-05-05", "title": "Dinosaur Bar-B-Que", "place": "Troy, NY",
-   "text": "We played our hearts out! Thank you to all who danced and cheered and had a great time!"},
-  {"date": "2018-03-16", "title": "ACLU benefit", "place": "Tavern at the A, Pittsfield, MA",
-   "text": "Pittsfield has a big local reggae scene, and we were excited to be invited to make music with them. It was a blast!"},
-  {"date": "2018-03-10", "title": "Umana Restaurant and Wine Bar", "place": "Albany, NY"},
-  {"date": "2018-02-03", "title": "The Savoy, with DJ Trumastr", "place": "Albany, NY",
-   "text": "We traded sets with DJ Trumastr, arguably Albany's best AfroBeat-spinning musician."},
-  {"date": "2018-01-27", "title": "The Linda", "place": "WAMC, 339 Central Ave., Albany, NY",
-   "text": "Part of the Linda's local music showcases."},
-  {"date": "2017-10-08", "title": "Grassroots Radio Conference", "place": "Grand Street Community Arts, Albany, NY",
-   "text": "Hosted at the home of Albany's local grassroots station, WCAA."},
-  {"date": "2017-07-21", "title": "The Savoy", "place": "Lark Street, Albany, NY"}
+  {
+    "date": "2025-10-25",
+    "title": "Harvest Fest",
+    "place": "Poughkeepsie Farm Project, Poughkeepsie, NY",
+    "text": "What a blast! We had fun at Poughkeepsie Farm Project's Harvest Fest, celebrating the power of urban farming. It was great to share the space with amazing vendors and performers.",
+    "photos": [
+      "poughkeepsie-farm-fest-thank-you-2025.jpg",
+      "poughkeepsie-farm-fest.png"
+    ]
+  },
+  {
+    "date": "2025-08-24",
+    "title": "Trail day, trio set",
+    "place": "With Mohawk Hudson Land Conservancy",
+    "text": "Thank you for letting us fill your trail needs as a trio version of Mixed Roots. Rainy Sunday August 24 was fantastic even with the mud. Extra thanks to the great, motivated volunteers from Mohawk Hudson Land Conservancy."
+  },
+  {
+    "date": "2025-08-21",
+    "title": "Shepard Park",
+    "place": "Lake George, NY",
+    "text": "Thank you to all of the dancers, listeners, watchers, and supporters at Shepard Park, Lake George. We had a blast. Thank you, Lake George, for the fireworks over the lake after!",
+    "photos": [
+      "lake-george-2025-august-21.jpg"
+    ]
+  },
+  {
+    "date": "2025-06-27",
+    "title": "Troy Night Out",
+    "place": "Troy, NY",
+    "text": "Troy Night Out was fantastic! Thank you to all the Caribbean American Heritage Month supporters, dancers, and listeners.",
+    "video": "troy_night_out_-_mixed_roots_502"
+  },
+  {
+    "date": "2025-05-03",
+    "dateLabel": "May 2025",
+    "title": "Battenkill Fly Fishing Festival",
+    "place": "Arlington, VT",
+    "text": "Thank you to the Arlington, Vermont Fly Fishing Festival! We had a great time. Glad to see our listeners dancing.",
+    "photos": [
+      "p88.png"
+    ],
+    "links": [
+      {
+        "label": "Festival site",
+        "url": "https://www.vtflyfest.com/saturday-2025"
+      }
+    ]
+  },
+  {
+    "date": "2025-02-21",
+    "title": "Troy pop-up with Oobleck",
+    "place": "Weathered Wood, Troy, NY",
+    "text": "Thank you for sharing a new venue with our friends of Oobleck!",
+    "photos": [
+      "oobleck-2-2025.jpg"
+    ]
+  },
+  {
+    "date": "2025-01-15",
+    "dateLabel": "Winter 2025",
+    "title": "Lark Hall",
+    "place": "Albany, NY",
+    "text": "We thank Lark Hall here in Albany for hosting us twice in the snow. We appreciated the warm vibes from our audience, especially those dancing!",
+    "photos": [
+      "frankie-action-lark-hall.jpeg",
+      "img-7505.jpg",
+      "img-7507.jpg"
+    ]
+  },
+  {
+    "date": "2024-12-20",
+    "title": "The Eleven @ Lark Hall",
+    "place": "Albany, NY",
+    "text": "We absolutely loved playing for you at The Eleven @ Lark Hall. To all a Happy New Year! The best is yet to come. One love."
+  },
+  {
+    "date": "2024-11-08",
+    "title": "Park Theater",
+    "place": "723 Warren St., Hudson, NY",
+    "text": "Thank you to all who came out to Park Theater Hudson!",
+    "photos": [
+      "october-2024-promo-for-11-8-24.jpg"
+    ],
+    "links": [
+      {
+        "label": "Watch on Vimeo",
+        "url": "https://vimeo.com/1016538628"
+      }
+    ]
+  },
+  {
+    "date": "2024-04-03",
+    "title": "Albany Center Gallery",
+    "place": "Albany, NY",
+    "photos": [
+      "p92.png"
+    ]
+  },
+  {
+    "date": "2023-11-19",
+    "title": "Celebrate Asylum benefit dinner",
+    "place": "First Lutheran Church, Albany, NY",
+    "text": "A fundraising dinner to support local asylum seekers, hosted by Capital District Border Watch.",
+    "photos": [
+      "p89.png"
+    ],
+    "links": [
+      {
+        "label": "Times Union coverage",
+        "url": "https://www.timesunion.com/faith/article/albany-church-site-benefit-asylum-seekers-18494689.php"
+      }
+    ]
+  },
+  {
+    "date": "2023-10-29",
+    "title": "October dance night",
+    "place": "",
+    "text": "Thank you to all who danced with us. It was a pleasure enjoying the good vibes."
+  },
+  {
+    "date": "2023-06-18",
+    "title": "Dad Fest",
+    "place": "Washington Park, Albany, NY"
+  },
+  {
+    "date": "2023-06-16",
+    "title": "Reggae Night",
+    "place": "Stable Gate Winery, Castleton, NY"
+  },
+  {
+    "date": "2023-05-20",
+    "title": "Albany Pine Bush",
+    "place": "Albany, NY",
+    "text": "Thank you for seeing us in May!"
+  },
+  {
+    "date": "2023-05-13",
+    "title": "Northampton",
+    "place": "Northampton, MA"
+  },
+  {
+    "date": "2023-03-05",
+    "title": "The Linda",
+    "place": "WAMC Performing Arts Studio, Albany, NY",
+    "text": "Originally scheduled for February 12, then March 5 at 3:00 pm. Thank you all for enjoying our performance, supported by New York FolkLife. Special shout-out to the dancers!"
+  },
+  {
+    "date": "2022-11-20",
+    "title": "Westminster Commons",
+    "place": "Albany, NY",
+    "text": "Thank you to Albany's Westminster Commons for having us play for the first of many more gatherings to come. The Sunday before Thanksgiving was awesome."
+  },
+  {
+    "date": "2022-10-02",
+    "title": "FolkFest",
+    "place": "Washington Park, Albany, NY",
+    "text": "Thanks for checking out the FolkFest hosted by New York Folklore. We were blessed to perform after a tremendously diverse set of talented performers. Dance! Listen! Enjoy the vibes!",
+    "photos": [
+      "p106.png"
+    ]
+  },
+  {
+    "date": "2022-07-24",
+    "title": "Stable Gate Farm and Winery",
+    "place": "Castleton, NY",
+    "text": "Thanks for dancing with us!"
+  },
+  {
+    "date": "2021-10-31",
+    "title": "Hallowine Block Party",
+    "place": "Stable Gate Winery, Castleton, NY",
+    "photos": [
+      "p82.jpeg"
+    ]
+  },
+  {
+    "date": "2021-10-30",
+    "title": "Illuminate: Masquerade",
+    "place": "Hudson Candy Factory, Troy, NY",
+    "text": "Thank you for checking us out at the end of October!",
+    "photos": [
+      "p85.png"
+    ]
+  },
+  {
+    "date": "2021-10-03",
+    "title": "Folklore Fest",
+    "place": "Washington Park, Albany, NY",
+    "text": "The first weekend of October we played Capital Wine again on Friday, and we were featured in the inaugural Folklore Fest at Washington Park on Sunday. It was great to see so much of our community there!",
+    "photos": [
+      "p81.png"
+    ]
+  },
+  {
+    "date": "2021-09-10",
+    "dateLabel": "Late summer 2021",
+    "title": "Stable Gate Fridays",
+    "place": "Stable Gate Winery, Castleton, NY",
+    "text": "We had fun seeing you dance and enjoying the grooves at Stable Gate on a couple of Fridays this late summer. Thanks for joining us!",
+    "photos": [
+      "p80.png"
+    ]
+  },
+  {
+    "date": "2021-07-11",
+    "title": "Opening for The Big Takeover",
+    "place": "Earth Sky Time, Manchester, VT",
+    "text": "We were invited to open for The Big Takeover. Earth Sky Time hosted the show. We always look forward to seeing you dance. Music is love. One love.",
+    "links": [
+      {
+        "label": "The Big Takeover",
+        "url": "https://bigtakeoverband.com"
+      }
+    ]
+  },
+  {
+    "date": "2021-06-30",
+    "title": "Alive at Five",
+    "place": "Corning Preserve, Albany, NY",
+    "text": "Thank you to the City of Albany for having us open the first Alive at Five since the pandemic. It was great to play, and we wish the sun had shone more. Keep The Meditations in mind: their sound check was fantastic, and we were sad they were rained out.",
+    "photos": [
+      "p79.png"
+    ]
+  },
+  {
+    "date": "2021-05-15",
+    "dateLabel": "May 2021",
+    "title": "Opening for Dr. Jah and the Love Prophets",
+    "place": "",
+    "text": "Sharing the night with other local reggae enthusiasts, we opened for Dr. Jah and the Love Prophets to welcome summer."
+  },
+  {
+    "date": "2020-10-31",
+    "title": "Pandemic Halloween",
+    "place": "Stable Gate Winery, Castleton, NY",
+    "text": "We enjoyed the spooky day from 3 to 8 pm with Glass Pony, another indie rock band in the Capital District."
+  },
+  {
+    "date": "2020-09-12",
+    "title": "Stable Gate residency",
+    "place": "Stable Gate Farm and Winery, Castleton, NY",
+    "text": "Our residency continued July 18, August 8, and September 12. It's always a pleasure to play with such great sun, such great people, and such great vibes."
+  },
+  {
+    "date": "2020-06-06",
+    "title": "Stable Gate Winery",
+    "place": "Castleton, NY",
+    "text": "Celebrating the world of post-pandemic possibilities."
+  },
+  {
+    "date": "2020-02-16",
+    "title": "Skyloft, with Robanic",
+    "place": "Albany, NY",
+    "text": "Thank you to Skyloft for hosting Robanic and Mixed Roots on Sunday evening. It's always a treat to bring reggae to new venues. Keep dancing!",
+    "photos": [
+      "p76.png"
+    ]
+  },
+  {
+    "date": "2020-02-16",
+    "title": "Perfect Blend Winter Series",
+    "place": "",
+    "text": "Perfect Blend's Winter Series hosted the (semi) acoustic version of Mixed Roots that morning. With hand drums, guitar, and vocals, Kofi and Pete kept the vibe for morning coffee drinkers.",
+    "photos": [
+      "p77.png"
+    ]
+  },
+  {
+    "date": "2019-11-01",
+    "title": "Umana",
+    "place": "Albany, NY",
+    "text": "Thanks for dancing the night away! Your first Friday of the month was filled with danceable beats and eclectically exotic flavor."
+  },
+  {
+    "date": "2019-09-20",
+    "title": "Opening for The Elovaters",
+    "place": "Rustic Barn Pub, Troy, NY",
+    "text": "What a night! Thank you to all who came out and danced!"
+  },
+  {
+    "date": "2019-07-15",
+    "dateLabel": "Summer 2019",
+    "title": "Lunchtime music series",
+    "place": "Empire State Plaza, Albany, NY",
+    "text": "Mixed Roots played under the second of four agency buildings during lunch for State workers, neighbors, friends, and local onlookers. Sharing our sound was a pleasure all around.",
+    "photos": [
+      "p73.png"
+    ]
+  },
+  {
+    "date": "2019-06-09",
+    "title": "Opening for The Big Takeover",
+    "place": "Earth Sky Time, Manchester, VT",
+    "text": "The energy was amazing. Thank you to all who came out and enjoyed the fresh night.",
+    "photos": [
+      "p71_1.png"
+    ]
+  },
+  {
+    "date": "2018-12-29",
+    "title": "Franklin Alley Social Club, first anniversary",
+    "place": "Troy, NY",
+    "text": "It was a blast. Hope all of the dancers and shuffleboarders had a great time!",
+    "photos": [
+      "p158.png",
+      "p155.png"
+    ]
+  },
+  {
+    "date": "2018-11-17",
+    "title": "Umana's fifth anniversary",
+    "place": "Albany, NY",
+    "text": "We had the amazing opportunity to share the fifth anniversary celebration with Umana.",
+    "photos": [
+      "p152.png"
+    ]
+  },
+  {
+    "date": "2018-10-20",
+    "title": "Snug Harbor",
+    "place": "New Paltz, NY",
+    "text": "Special thanks to RootBrew for hosting us at Snug Harbor. It was a pleasure to play for a very welcoming audience filled with reggae fans!"
+  },
+  {
+    "date": "2018-10-12",
+    "title": "Umana",
+    "place": "Albany, NY",
+    "text": "Danceable AfroBeat and reggae from 8 to 10 pm. We hope to come again to share the beats, share the vibes, and have you dance your night away."
+  },
+  {
+    "date": "2018-10-05",
+    "title": "Parish Public House, with Mosaic Foundation",
+    "place": "Albany, NY",
+    "text": "Parish Public House hosted Mosaic Foundation and had us open the stage and warm up the dance floor."
+  },
+  {
+    "date": "2018-07-19",
+    "title": "Alive at Five, opening for Third World",
+    "place": "Albany, NY",
+    "text": "Mixed Roots graced the City of Albany with AfroBeat and reggae, opening for Grammy-nominated, world-renowned Third World. We enjoyed the sun as it approached 96 degrees in the shade. After the show a few of us got to take photos with Third World.",
+    "photos": [
+      "p99.png",
+      "p100.png"
+    ]
+  },
+  {
+    "date": "2018-07-13",
+    "title": "Albany Public Library",
+    "place": "Main Branch, 161 Washington Ave., Albany, NY",
+    "text": "Connecting with our community is always fun. Bringing AfroBeat and reggae all around the Northeast is our pleasure.",
+    "photos": [
+      "p96.png"
+    ]
+  },
+  {
+    "date": "2018-06-16",
+    "title": "Franklin Alley Social Club",
+    "place": "Troy, NY",
+    "text": "The social club expanded into the alley it is named for, and we enjoyed the sun and shade, danced, and played simultaneously. Photo credit to Heather, our guitarist's wife.",
+    "photos": [
+      "p94.png"
+    ]
+  },
+  {
+    "date": "2018-05-05",
+    "title": "Dinosaur Bar-B-Que",
+    "place": "Troy, NY",
+    "text": "We played our hearts out! Thank you to all who danced and cheered and had a great time!"
+  },
+  {
+    "date": "2018-03-16",
+    "title": "ACLU benefit",
+    "place": "Tavern at the A, Pittsfield, MA",
+    "text": "Pittsfield has a big local reggae scene, and we were excited to be invited to make music with them. It was a blast!"
+  },
+  {
+    "date": "2018-03-10",
+    "title": "Umana Restaurant and Wine Bar",
+    "place": "Albany, NY"
+  },
+  {
+    "date": "2018-02-03",
+    "title": "The Savoy, with DJ Trumastr",
+    "place": "Albany, NY",
+    "text": "We traded sets with DJ Trumastr, arguably Albany's best AfroBeat-spinning musician."
+  },
+  {
+    "date": "2018-01-27",
+    "title": "The Linda",
+    "place": "WAMC, 339 Central Ave., Albany, NY",
+    "text": "Part of the Linda's local music showcases."
+  },
+  {
+    "date": "2017-10-08",
+    "title": "Grassroots Radio Conference",
+    "place": "Grand Street Community Arts, Albany, NY",
+    "text": "Hosted at the home of Albany's local grassroots station, WCAA."
+  },
+  {
+    "date": "2017-07-21",
+    "title": "The Savoy",
+    "place": "Lark Street, Albany, NY"
+  }
 ]

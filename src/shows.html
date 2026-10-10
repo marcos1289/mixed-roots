@@ -24,17 +24,13 @@
 <main id="main" class="section archive">
   <p class="eyebrow">Show history</p>
   <h1>{{show_count}} shows since {{first_year}}.</h1>
-  <p class="lead">Every show from the band's original website, newest first. Thank you to every venue, organizer, and dancer.</p>
+  <p class="lead">Every show, newest first. Thank you to every venue, organizer, and dancer.</p>
   <nav class="year-nav" aria-label="Years">{{year_nav}}</nav>
   <div data-lightbox-group>{{archive}}</div>
 </main>
 <footer class="site-footer">
   <a class="brand" href="./">Mixed Roots<span>Albany, New York</span></a>
-  <nav aria-label="Elsewhere">
-    <a href="https://www.facebook.com/Mixed-Roots-Reggae-1337569189643533/" target="_blank" rel="noopener">Facebook</a>
-    <a href="https://music.youtube.com/channel/UCyPiesgdO8TSPQgSf3rXtSA" target="_blank" rel="noopener">YouTube Music</a>
-    <a href="mailto:MixedRootsNewYork@gmail.com">Email</a>
-  </nav>
+  <nav aria-label="Elsewhere">{{footer_links}}</nav>
   <p>© {{year}} Mixed Roots</p>
 </footer>
 <dialog class="lightbox" aria-label="Photo viewer">

@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Mixed Roots Admin</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<header class="bar">
+  <strong>Mixed Roots <span>admin</span></strong>
+  <nav>
+    <a href="../" target="_blank" rel="noopener">View site ↗</a>
+    <button type="button" id="logout" hidden>Log out</button>
+  </nav>
+</header>
+
+<section id="login" class="panel narrow" hidden>
+  <h1>Sign in</h1>
+  <p>Paste the access key Mark gave you. It stays on this device only.</p>
+  <form id="login-form">
+    <label>Access key <input id="key" type="password" autocomplete="current-password" required></label>
+    <button class="primary" type="submit">Sign in</button>
+    <p class="error" id="login-error" role="alert"></p>
+  </form>
+</section>
+
+<main id="app" hidden>
+  <nav class="tabs" role="tablist">
+    <button type="button" role="tab" data-tab="shows" aria-selected="true">Shows</button>
+    <button type="button" role="tab" data-tab="photos">Photos</button>
+    <button type="button" role="tab" data-tab="band">Band info</button>
+  </nav>
+
+  <section data-panel="shows" class="panel">
+    <div class="row-head"><h1>Shows</h1><button type="button" class="primary" id="add-show">+ Add show</button></div>
+    <h2>Upcoming</h2>
+    <ul class="list" id="upcoming"></ul>
+    <h2>Past</h2>
+    <ul class="list" id="past"></ul>
+    <button type="button" class="link" id="more-past" hidden>Show all past shows</button>
+  </section>
+
+  <section data-panel="photos" class="panel" hidden>
+    <div class="row-head"><h1>Photo gallery</h1>
+      <div class="actions">
+        <label class="button primary">Upload photos<input type="file" accept="image/*" multiple id="gallery-upload" hidden></label>
+        <button type="button" id="gallery-library">From library</button>
+      </div>
+    </div>
+    <p class="hint">Shown on the home page in this order. Captions appear when a photo is opened.</p>
+    <ul class="gallery-list" id="gallery"></ul>
+  </section>
+
+  <section data-panel="band" class="panel" hidden>
+    <h1>Band info</h1>
+    <form id="band-form" class="stack"></form>
+  </section>
+</main>
+
+<footer class="publish" id="publish-bar" hidden>
+  <span id="publish-status">No unpublished changes</span>
+  <button type="button" class="primary" id="publish" disabled>Publish</button>
+</footer>
+
+<dialog id="show-dialog" class="sheet">
+  <form method="dialog" id="show-form" class="stack">
+    <h2 id="show-dialog-title">Show</h2>
+    <label>Date <input type="date" name="date" required></label>
+    <label>Date shown on the site <small>(optional, e.g. "Summer 2026" when the exact day isn't set)</small><input name="dateLabel"></label>
+    <label>Time <small>(optional)</small><input name="time" placeholder="8:00 pm"></label>
+    <label>Title / event <input name="title" required placeholder="Troy Night Out"></label>
+    <label>Venue and city <input name="place" placeholder="Lark Hall, Albany, NY"></label>
+    <label>Description <small>(optional)</small><textarea name="text" rows="4"></textarea></label>
+    <fieldset>
+      <legend>Links <small>(tickets, event page, video)</small></legend>
+      <div id="show-links"></div>
+      <button type="button" class="link" id="add-link">+ Add link</button>
+    </fieldset>
+    <fieldset>
+      <legend>Photos and flyers</legend>
+      <div class="thumbs" id="show-photos"></div>
+      <div class="actions">
+        <label class="button">Upload<input type="file" accept="image/*" multiple id="show-upload" hidden></label>
+        <button type="button" id="show-library">From library</button>
+      </div>
+    </fieldset>
+    <p class="error" id="show-error" role="alert"></p>
+    <div class="dialog-actions">
+      <button type="button" class="danger" id="delete-show">Delete show</button>
+      <span></span>
+      <button type="button" id="cancel-show">Cancel</button>
+      <button type="submit" class="primary" value="save">Done</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="library-dialog" class="sheet wide">
+  <div class="row-head"><h2>Choose photos</h2><button type="button" id="library-close">Close</button></div>
+  <p class="hint">Tap photos to add them.</p>
+  <div class="library" id="library"></div>
+</dialog>
+
+<script src="admin.js"></script>
+</body>
+</html>
