@@ -1,32 +1,200 @@
+#!/usr/bin/env python3
+"""Build the Mixed Roots site into docs/ (served by GitHub Pages).
+
+    python3 build.py
+
+Content lives in content/*.json, page templates and styles in src/.
+Photos come from recovery/media/photos and are resized, re-encoded and
+stripped of metadata (phone photos can carry GPS coordinates). Videos are
+re-encoded with ffmpeg. Both are cached, so re-runs only redo new files.
+"""
+import datetime
+import html
+import json
+import re
+import shutil
+import subprocess
 from pathlib import Path
-import json,html,re,zipfile
-r=Path(__file__).parent;d=r/'dist'
-manifest=json.loads((r/'.openai/hosting.json').read_text());manifest['static']={'directory':'dist'};(r/'.openai/hosting.json').write_text(json.dumps(manifest,indent=2))
-fb='https://www.facebook.com/Mixed-Roots-Reggae-1337569189643533/'
-site='''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mixed Roots | Afrobeat & Reggae • Albany, NY</title><meta name="description" content="Mixed Roots brings Afrobeat, reggae, and danceable grooves to Albany and beyond. Discover the band, explore live performances, and get in touch for bookings."><meta name="theme-color" content="#172c24"><link rel="stylesheet" href="style.css"></head><body>
-<a class="skip" href="#main">Skip to content</a><header><a class="brand" href="#">MIXED ROOTS<span>ALBANY, NEW YORK</span></a><nav aria-label="Main navigation"><a href="#about">The band</a><a href="#live">Live</a><a href="#photos">Photos</a><a class="nav-book" href="#booking">Book the band ↗</a></nav></header>
-<main id="main"><section class="hero"><div class="hero-top"><p class="eyebrow">MANY ROOTS. ONE RHYTHM.</p><p class="location">AFROBEAT / REGGAE / ALBANY, NY</p></div><h1>Good music.<br>Deep roots.<br><em>Come dance.</em></h1><div class="hero-bottom"><p>Ghanaian rhythms. Reggae soul.<br>A sound that brings us together.</p><a class="button" href="#live">Feel the groove <span>↗</span></a></div><div class="hero-photo"><img src="assets/asset-603193851.jpeg" alt="Mixed Roots band members together on a staircase"><span>MIXED ROOTS · ONE LOVE</span></div></section>
-<div class="ribbon" aria-hidden="true">AFROBEAT <span>✳</span> REGGAE <span>✳</span> GOOD VIBES <span>✳</span> MIXED ROOTS <span>✳</span> ONE LOVE</div>
-<section class="about section" id="about"><div><p class="eyebrow">01 / THE BAND</p><h2>Different journeys.<br><em>A shared groove.</em></h2></div><div><p class="large">Rooted in Albany. Connected to the world.</p><p>Led by drummer and vocalist George, Mixed Roots brings together musicians with different backgrounds and a love of music that moves people. Traditional African rhythms meet reggae, guitar, bass, keys, percussion, and horns.</p><p>From Ghana and Nigeria to Ireland and New York, those influences come together in an energetic, danceable sound. Music is love. One love.</p><details><summary>Explore the archived band story ↗</summary><div class="archive-bio">BIO</div><p class="note">This biography comes from the original site. The band’s current lineup should be confirmed before public launch.</p></details></div></section>
-<section id="live" class="live section"><div class="section-heading"><div><p class="eyebrow">02 / IN THE ROOM</p><h2>Better <em>live.</em></h2></div><a class="text-link" href="FB" target="_blank" rel="noopener">Watch on Facebook ↗</a></div><div class="live-grid"><img src="assets/asset-frankie-action-lark-hall_orig.jpeg" alt="Mixed Roots performing live at Lark Hall" loading="lazy"><div><h3>Bring your dancing shoes.</h3><p>Explore moments from past shows, from Albany’s stages to festivals around the region.</p><div class="show"><span>PAST SHOW · 2025</span><strong>Troy Night Out</strong><p>Troy, New York · June 27</p></div><div class="show"><span>PAST SHOW · 2025</span><strong>Shepard Park</strong><p>Lake George, New York · August 21</p></div><p class="note">New dates will be posted here when confirmed. Follow the band for announcements.</p><a class="text-link" href="history.html">Explore the full performance archive ↗</a></div></div></section>
-<section id="photos" class="section photos"><div class="section-heading"><div><p class="eyebrow">03 / MOMENTS & MEMORIES</p><h2>The people.<br><em>The energy.</em></h2></div><p>Original photographs, recovered<br>from the band’s website.</p></div><div id="gallery" class="gallery">GALLERY</div></section>
-<section class="press section"><p class="eyebrow">04 / IN THE COMMUNITY</p><h2>Music that<br><em>brings people together.</em></h2><p>The original site featured press coverage of a benefit for asylum seekers in Albany.</p><a class="text-link" href="https://www.timesunion.com/faith/article/albany-church-site-benefit-asylum-seekers-18494689.php" target="_blank" rel="noopener">Read the Times Union story ↗</a></section>
-<section id="booking" class="booking section"><p class="eyebrow">05 / LET’S MAKE SOME MUSIC</p><h2>Good people.<br>Great night.<br><em>Mixed Roots.</em></h2><p>Have a venue, festival, or event in mind?<br>Get in touch with the band to check availability.</p><a class="button" href="mailto:MixedRootsNewYork@gmail.com?subject=Mixed%20Roots%20booking%20inquiry">Book Mixed Roots ↗</a><a class="email" href="mailto:MixedRootsNewYork@gmail.com">MixedRootsNewYork@gmail.com</a></section></main>
-<footer><a class="brand" href="#">MIXED ROOTS<span>AFROBEAT & REGGAE</span></a><p>Albany, New York · Music is love. One love.</p><a href="FB" target="_blank" rel="noopener">Facebook ↗</a></footer>
-<dialog id="lightbox"><button class="close" aria-label="Close photograph">×</button><img alt=""><p></p></dialog><script src="app.js"></script></body></html>'''
-bio=(r/'recovery/about.html.txt').read_text();bio=bio[bio.index('A band that'):bio.index('Proudly powered')];bio=''.join('<p>'+html.escape(x)+'</p>' for x in bio.splitlines() if x.strip())
-photos=['asset-603193851.jpeg','asset-frankie-action-lark-hall_orig.jpeg','asset-p55_orig.jpeg','asset-p56_orig.png','asset-p84.png','asset-p88.png','asset-p95.png']
-gallery=''.join(f'<button class="photo" data-photo="assets/{x}" data-caption="Mixed Roots — original website photograph"><img src="assets/{x}" loading="lazy" alt="Mixed Roots — original website photograph"><span>View photograph ↗</span></button>' for x in photos if (d/'assets'/x).exists())
-(d/'index.html').write_text(site.replace('FB',fb).replace('BIO',bio).replace('GALLERY',gallery))
-history=(r/'recovery/performances.html.txt').read_text();history=history[history.index('What a blast!'):];history=history.split('Proudly powered')[0]
-(d/'history.html').write_text('<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Performance archive | Mixed Roots</title><link rel="stylesheet" href="style.css"><header><a class="brand" href="index.html">MIXED ROOTS<span>PERFORMANCE ARCHIVE</span></a><a href="index.html#live">← Back to the band</a></header><main class="section"><p class="eyebrow">FROM THE ORIGINAL WEBSITE</p><h1>Years of<br><em>good grooves.</em></h1><p>Historical entries preserved from the archived website. Dates and references reflect the original text.</p><article class="history">'+''.join('<p>'+html.escape(x)+'</p>' for x in history.splitlines() if x.strip())+'</article></main></html>')
-(d/'style.css').write_text('''@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
-:root{--cream:#f4f0e6;--green:#172c24;--lime:#d8eb8b;--orange:#bf5834}*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:90px}body{margin:0;background:var(--cream);color:var(--green);font-family:'DM Sans',Arial,sans-serif}a{color:inherit;text-decoration:none}button{font:inherit}a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--orange);outline-offset:5px}header{padding:25px 5%;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #172c2430}.brand{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-1px;font-size:25px}.brand span{display:block;font:9px 'DM Sans',sans-serif;letter-spacing:2.6px;margin-top:5px}nav{display:flex;gap:35px;align-items:center;font-size:13px}.nav-book{border:1px solid var(--green);padding:12px 17px;border-radius:25px}.eyebrow,.location{font-size:11px;font-weight:700;letter-spacing:2px}.hero{padding:36px 5% 0;position:relative}.hero-top{display:flex;justify-content:space-between}h1,h2,h3{font-family:'Space Grotesk',sans-serif;font-weight:500;letter-spacing:-4px;line-height:.99}h1{font-size:clamp(60px,8.4vw,130px);margin:35px 0 20px}em{font-style:normal;color:var(--orange)}.hero h1{position:relative;z-index:1;width:54%}.hero-photo{position:absolute;right:5%;top:98px;width:44%;height:470px;overflow:hidden;border-radius:120px 5px 5px 5px}.hero-photo img{width:100%;height:100%;object-fit:cover;object-position:center}.hero-photo span{position:absolute;bottom:15px;left:20px;color:white;font-size:9px;letter-spacing:2px;background:#172c2490;padding:8px}.hero-bottom{display:flex;gap:35px;align-items:center;padding-bottom:55px}.hero-bottom p{font-size:14px;line-height:1.6}.button{background:var(--green);color:var(--cream);border-radius:30px;padding:17px 24px;display:inline-flex;gap:35px;font-size:13px}.ribbon{background:var(--lime);padding:24px 4%;display:flex;justify-content:space-between;align-items:center;font-size:13px;letter-spacing:2px;font-weight:700}.ribbon span{font-size:25px}.section{padding:100px 7%;border-bottom:1px solid #172c2420}h2{font-size:clamp(42px,5vw,76px);margin:24px 0 35px;letter-spacing:-3px}h3{font-size:32px;letter-spacing:-1px}.about{display:grid;grid-template-columns:1fr 1fr;gap:8%}p{line-height:1.8;font-size:15px}.large{font-size:23px;line-height:1.4}details{margin-top:30px;border-top:1px solid #172c2440;padding-top:20px}summary{cursor:pointer;font-size:13px;font-weight:700}.note{font-size:12px;opacity:.7}.archive-bio p{font-size:14px}.section-heading{display:flex;justify-content:space-between;align-items:center;gap:30px}.text-link{font-size:13px;border-bottom:1px solid;padding-bottom:7px;display:inline-block}.live{background:var(--green);color:var(--cream)}.live em{color:var(--lime)}.live-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:7%}.live-grid>img{width:100%;height:100%;max-height:570px;object-fit:cover;border-radius:4px}.show{border-top:1px solid #ffffff30;padding:18px 0}.show span{font-size:9px;letter-spacing:2px;display:block;margin-bottom:10px;color:var(--lime)}.show strong{font:24px 'Space Grotesk',sans-serif}.show p{margin:4px 0 0;font-size:13px}.gallery{display:grid;grid-template-columns:1fr 1fr;gap:24px}.photo{padding:0;border:0;background:none;text-align:left;cursor:pointer;color:var(--green)}.photo img{width:100%;height:330px;object-fit:cover;border-radius:3px;transition:filter .2s}.photo:hover img{filter:brightness(.85)}.photo span{display:block;margin:10px 0;font-size:12px}.press{background:#e6e7d9}.booking{text-align:center;background:var(--lime)}.booking h2{font-size:clamp(55px,7vw,100px)}.booking .email{display:block;font-size:13px;margin-top:20px}footer{padding:40px 5%;display:flex;justify-content:space-between;align-items:center;gap:20px}footer p,footer>a:last-child{font-size:12px}dialog{border:0;background:var(--cream);max-width:92vw;max-height:92vh;padding:40px 20px 10px}dialog::backdrop{background:#000c}dialog img{max-width:85vw;max-height:75vh;object-fit:contain}.close{position:absolute;top:5px;right:12px;background:none;border:0;font-size:30px;cursor:pointer}.history{max-width:800px;margin-top:50px}.history p{border-bottom:1px solid #172c2420;padding:12px 0}.skip{position:absolute;left:10px;top:-100px;z-index:10;background:white;padding:10px}.skip:focus{top:10px}@media(min-width:1500px){.hero-photo{height:550px}}@media(max-width:900px){nav{gap:18px}.hero-photo{position:relative;right:auto;top:auto;width:100%;height:420px;border-radius:80px 4px 4px 4px}.hero h1{width:auto}.hero-bottom{padding-bottom:25px}.hero{padding-bottom:35px}.about,.live-grid{grid-template-columns:1fr;gap:30px}.section{padding:65px 6%}.ribbon{font-size:10px;letter-spacing:1px}.section-heading{align-items:flex-start}.live-grid>img{height:330px}}@media(max-width:550px){header{padding:20px 5%;align-items:flex-start}.brand{font-size:20px}nav{gap:12px;flex-wrap:wrap;justify-content:flex-end;max-width:190px;font-size:11px}.nav-book{padding:7px 10px}.hero-top .location{display:none}h1{font-size:65px;letter-spacing:-3px}.hero-photo{height:310px}.hero-bottom{justify-content:space-between;gap:10px}.button{padding:15px 19px;gap:12px}.ribbon{overflow:hidden;gap:15px;white-space:nowrap}.ribbon span{font-size:17px}.gallery{grid-template-columns:1fr}.photo img{height:300px}.section-heading{display:block}.section-heading>a{margin-bottom:25px}footer{flex-wrap:wrap}footer p{width:100%;order:3}.section h2{letter-spacing:-2px}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}''')
-(d/'app.js').write_text('''const box=document.querySelector('#lightbox');document.querySelectorAll('[data-photo]').forEach(button=>button.addEventListener('click',()=>{box.querySelector('img').src=button.dataset.photo;box.querySelector('img').alt=button.dataset.caption;box.querySelector('p').textContent=button.dataset.caption;box.showModal();}));box.querySelector('.close').addEventListener('click',()=>box.close());box.addEventListener('click',e=>{if(e.target===box)box.close()});''')
-(r/'README.md').write_text('''# Mixed Roots rebuild
-Static website: dist/index.html. Host the dist directory on any static host. No Weebly dependency or build step.
-Booking email was decoded from the archived Contact page. Facebook link recovered from Performances.
-Before public launch: confirm booking email, current band lineup, social links, photo credits and upcoming shows with the band. Archive biographies may be out of date. Original homepage already contained unrelated Highpeak template content on the supplied snapshot; intentionally replaced in the redesign.
-recovery/ contains original archived HTML, readable text, CDX index, and recovery manifest. Archive replay selects the closest available capture for each URL; assets are not necessarily all captured on January 21, 2026. Missing files are recorded, not replaced with invented photographs.
-''')
-print('Built',d)
+
+from PIL import Image, ImageOps
+
+ROOT = Path(__file__).resolve().parent
+OUT = ROOT / "docs"
+PHOTOS = ROOT / "recovery/media/photos"
+VIDEOS = ROOT / "recovery/media/video"
+SRC = ROOT / "src"
+DOMAIN = "www.mixedrootsnewyork.com"
+WIDTHS = (640, 1600)
+WRITTEN = set()
+
+VIDEO_INFO = {
+    "troy_night_out_-_mixed_roots_502": "Troy Night Out, June 2025",
+    "p83_349": "Mixed Roots: AfroBeat and reggae",
+    "p86_414": "Live clip",
+}
+
+e = html.escape
+
+
+def slug(name):
+    return re.sub(r"[^a-z0-9]+", "-", Path(name).name.lower()).strip("-")
+
+
+def photo(name):
+    """Resize one recovered photo to every width in WIDTHS; return its metadata."""
+    src = PHOTOS / name.replace("background-images/", "backgrounds/")
+    with Image.open(src) as im:
+        im = ImageOps.exif_transpose(im).convert("RGB")
+        w, h = im.size
+        out = {}
+        for target in WIDTHS:
+            tw = min(target, w)
+            dest = OUT / "img" / f"{slug(name)}-{target}.jpg"
+            if not dest.exists():
+                im.resize((tw, round(h * tw / w)), Image.LANCZOS).save(
+                    dest, "JPEG", quality=80, optimize=True, progressive=True)
+            WRITTEN.add(dest.name)
+            out[target] = (f"img/{dest.name}", tw)
+    return {"small": out[640][0], "large": out[1600][0], "w": w, "h": h,
+            "srcset": f"{out[640][0]} {out[640][1]}w, {out[1600][0]} {out[1600][1]}w"}
+
+
+def img_tag(p, alt, sizes, cls="", lazy=True):
+    return (f'<img src="{p["small"]}" srcset="{p["srcset"]}" sizes="{sizes}" '
+            f'width="{p["w"]}" height="{p["h"]}" alt="{e(alt)}"'
+            + (' loading="lazy"' if lazy else '') + (f' class="{cls}"' if cls else "") + ">")
+
+
+def thumb(name, caption, sizes):
+    p = photo(name)
+    return (f'<button class="thumb" type="button" data-full="{p["large"]}" data-caption="{e(caption)}">'
+            f'{img_tag(p, caption, sizes)}</button>')
+
+
+def video(key):
+    dest = OUT / "video" / f"{slug(key)}.mp4"
+    if not dest.exists():
+        subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", str(VIDEOS / f"{key}.mp4"),
+                        "-vf", "scale='min(720,iw)':-2", "-c:v", "libx264", "-crf", "27",
+                        "-preset", "slow", "-c:a", "aac", "-b:a", "128k",
+                        "-movflags", "+faststart", str(dest)], check=True)
+    poster = OUT / "video" / f"{slug(key)}.jpg"
+    if not poster.exists():
+        with Image.open(VIDEOS / f"{key}.jpg") as im:
+            im.convert("RGB").save(poster, "JPEG", quality=80, optimize=True)
+    WRITTEN.update({dest.name, poster.name})
+    with Image.open(poster) as im:
+        w, h = im.size
+    title = VIDEO_INFO.get(key, "")
+    orient = "tall" if h > w else "wide"
+    return (f'<figure class="video {orient}"><video controls preload="none" playsinline '
+            f'poster="video/{poster.name}" width="{w}" height="{h}">'
+            f'<source src="video/{dest.name}" type="video/mp4"></video>'
+            f'<figcaption>{e(title)}</figcaption></figure>')
+
+
+def show_date(s):
+    if s.get("dateLabel"):
+        return s["dateLabel"]
+    d = datetime.date.fromisoformat(s["date"])
+    return f"{d:%B} {d.day}, {d.year}"
+
+
+def show_entry(s, with_media=True):
+    parts = [f'<article class="show" id="{s["date"]}-{slug(s["title"])}">',
+             f'<p class="show-date"><time datetime="{s["date"]}">{e(show_date(s))}</time></p>',
+             f'<h3>{e(s["title"])}</h3>']
+    if s.get("place"):
+        parts.append(f'<p class="show-place">{e(s["place"])}</p>')
+    if s.get("text"):
+        parts.append(f'<p>{e(s["text"])}</p>')
+    if with_media and s.get("photos"):
+        parts.append('<div class="show-photos">' + "".join(
+            thumb(p, f'{s["title"]}, {show_date(s)}', "(max-width: 600px) 45vw, 220px")
+            for p in s["photos"]) + "</div>")
+    if with_media and s.get("video"):
+        parts.append(video(s["video"]))
+    if s.get("links"):
+        parts.append('<p class="show-links">' + " ".join(
+            f'<a href="{e(l["url"])}" target="_blank" rel="noopener">{e(l["label"])} ↗</a>'
+            for l in s["links"]) + "</p>")
+    parts.append("</article>")
+    return "".join(parts)
+
+
+def recent_card(s):
+    media = ""
+    if s.get("photos"):
+        media = img_tag(photo(s["photos"][0]), f'{s["title"]}, {show_date(s)}',
+                        "(max-width: 700px) 90vw, 30vw")
+    return (f'<a class="card" href="shows.html#{s["date"]}-{slug(s["title"])}">{media}'
+            f'<span class="show-date">{e(show_date(s))}</span>'
+            f'<strong>{e(s["title"])}</strong><span class="show-place">{e(s.get("place", ""))}</span></a>')
+
+
+def render(template, **values):
+    text = (SRC / template).read_text()
+    for k, v in values.items():
+        text = text.replace("{{" + k + "}}", v)
+    missing = re.findall(r"\{\{(\w+)\}\}", text)
+    if missing:
+        raise SystemExit(f"{template}: no value for {missing}")
+    (OUT / template).write_text(text)
+
+
+def main():
+    (OUT / "img").mkdir(parents=True, exist_ok=True)
+    (OUT / "video").mkdir(exist_ok=True)
+    shows = sorted(json.loads((ROOT / "content/shows.json").read_text()),
+                   key=lambda s: s["date"], reverse=True)
+    gallery = json.loads((ROOT / "content/gallery.json").read_text())
+    today = datetime.date.today().isoformat()
+    upcoming = [s for s in reversed(shows) if s["date"] >= today]
+    past = [s for s in shows if s["date"] < today]
+
+    if upcoming:
+        upcoming_html = "".join(show_entry(s, with_media=False) for s in upcoming)
+    else:
+        upcoming_html = ('<p class="empty">No dates are posted right now. New shows go up here '
+                         'and on <a href="https://www.facebook.com/Mixed-Roots-Reggae-1337569189643533/" '
+                         'target="_blank" rel="noopener">Facebook</a>.</p>')
+
+    years = {}
+    for s in past:
+        years.setdefault(s["date"][:4], []).append(s)
+    archive = "".join(
+        f'<section class="year" id="y{y}"><h2>{y}</h2>' + "".join(show_entry(s) for s in ss) + "</section>"
+        for y, ss in years.items())
+    year_nav = " ".join(f'<a href="#y{y}">{y}</a>' for y in years)
+
+    hero = photo("background-images/603193851.jpeg")
+    roots = photo("background-images/1473576544.png")
+    common = {"year": str(datetime.date.today().year)}
+
+    render("index.html",
+           hero_img=img_tag(hero, "Mixed Roots on stage", "100vw", lazy=False),
+           roots_img=roots["large"],
+           og_image=f'https://{DOMAIN}/{hero["large"]}',
+           upcoming=upcoming_html,
+           recent="".join(recent_card(s) for s in [s for s in past if s.get("photos")][:3]),
+           show_count=str(len(past)),
+           first_year=past[-1]["date"][:4],
+           videos="".join(video(k) for k in VIDEO_INFO),
+           gallery="".join(thumb(g["file"], g["caption"], "(max-width: 600px) 50vw, (max-width: 1000px) 33vw, 25vw")
+                           for g in gallery),
+           **common)
+    render("shows.html", archive=archive, year_nav=year_nav, show_count=str(len(past)),
+           first_year=past[-1]["date"][:4], **common)
+    for f in ("style.css", "app.js", "favicon.svg"):
+        shutil.copy2(SRC / f, OUT / f)
+    (OUT / "CNAME").write_text(DOMAIN + "\n")
+    (OUT / ".nojekyll").write_text("")
+
+    for f in list((OUT / "img").iterdir()) + list((OUT / "video").iterdir()):
+        if f.name not in WRITTEN:
+            f.unlink()
+    print(f"Built {OUT}: {len(past)} past shows, {len(upcoming)} upcoming, {len(gallery)} gallery photos")
+
+
+if __name__ == "__main__":
+    main()

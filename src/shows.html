@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Shows | Mixed Roots</title>
+<meta name="description" content="Every Mixed Roots show since {{first_year}}: Albany, Troy, Lake George, Vermont and beyond.">
+<meta name="theme-color" content="#172c24">
+<link rel="canonical" href="https://www.mixedrootsnewyork.com/shows.html">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Space+Grotesk:wght@500;700&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <a class="brand" href="./">Mixed Roots<span>AfroBeat &amp; Reggae</span></a>
+  <nav aria-label="Main">
+    <a href="./#band">Band</a><a href="./#shows">Shows</a><a href="./#videos">Videos</a><a href="./#photos">Photos</a><a class="nav-book" href="./#booking">Book us</a>
+  </nav>
+</header>
+<main id="main" class="section archive">
+  <p class="eyebrow">Show history</p>
+  <h1>{{show_count}} shows since {{first_year}}.</h1>
+  <p class="lead">Every show from the band's original website, newest first. Thank you to every venue, organizer, and dancer.</p>
+  <nav class="year-nav" aria-label="Years">{{year_nav}}</nav>
+  <div data-lightbox-group>{{archive}}</div>
+</main>
+<footer class="site-footer">
+  <a class="brand" href="./">Mixed Roots<span>Albany, New York</span></a>
+  <nav aria-label="Elsewhere">
+    <a href="https://www.facebook.com/Mixed-Roots-Reggae-1337569189643533/" target="_blank" rel="noopener">Facebook</a>
+    <a href="https://music.youtube.com/channel/UCyPiesgdO8TSPQgSf3rXtSA" target="_blank" rel="noopener">YouTube Music</a>
+    <a href="mailto:MixedRootsNewYork@gmail.com">Email</a>
+  </nav>
+  <p>© {{year}} Mixed Roots</p>
+</footer>
+<dialog class="lightbox" aria-label="Photo viewer">
+  <button class="lb-close" type="button" aria-label="Close">×</button>
+  <button class="lb-prev" type="button" aria-label="Previous photo">‹</button>
+  <figure><img alt=""><figcaption></figcaption></figure>
+  <button class="lb-next" type="button" aria-label="Next photo">›</button>
+</dialog>
+<script src="app.js"></script>
+</body>
+</html>
