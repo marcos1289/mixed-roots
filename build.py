@@ -198,7 +198,7 @@ def main():
     facebook = next((l["url"] for l in links if "facebook.com" in l["url"]), None)
 
     if upcoming:
-        upcoming_html = "".join(show_entry(s, with_media=False) for s in upcoming)
+        upcoming_html = "".join(show_entry(s) for s in upcoming)
     else:
         upcoming_html = '<p class="empty">No dates are posted right now. New shows go up here' + (
             f' and on {ext_link("Facebook", facebook)}.</p>' if facebook else ".</p>")

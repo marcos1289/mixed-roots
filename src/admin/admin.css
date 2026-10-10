@@ -3,6 +3,7 @@
   --line: #172c2426; --soft: #172c24a6; --red: #b3261e;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body { margin: 0; background: var(--cream); color: var(--green); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; padding-bottom: 90px; }
 h1 { font-size: 26px; margin: 0; }
 h2 { font-size: 15px; text-transform: uppercase; letter-spacing: .08em; margin: 28px 0 8px; color: var(--soft); }
@@ -77,6 +78,7 @@ dialog::backdrop { background: #0008; }
   .list .when { flex-basis: 84px; }
   .link-row { grid-template-columns: 1fr; }
   .gallery-list li { grid-template-columns: 80px 1fr; }
+  .gallery-list img { width: 80px; height: 60px; }
   .gallery-list .moves { grid-column: 1 / -1; justify-content: flex-end; }
   .dialog-actions { grid-template-columns: 1fr 1fr; }
   .dialog-actions span { display: none; }
