@@ -533,7 +533,7 @@ def song_sheet(song, starts, bpm):
 
 
 def main():
-    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    args = [a for a in sys.argv[1:] if not a.startswith("--") and (sys.argv.index(a) == 0 or sys.argv[sys.argv.index(a) - 1] != "--out")]
     song_path = Path(args[0] if args else REPO / "tools/compose/songs/common-ground.json")
     song = json.loads(song_path.read_text())
     bpm = song["bpm"]
@@ -542,14 +542,14 @@ def main():
     for part, a, b in dub["drops"]:                     # dub drop-outs: parts leave the mix
         straight[part] = [x for x in straight[part] if not (a <= x[0] < b)]
     notes = apply_groove(straight, groove, bpm, swing_map)
-    slug = "Test song - " + song["title"]
+    slug = sys.argv[sys.argv.index("--out") + 1] if "--out" in sys.argv else "Test song - " + song["title"]
     out = REPO / "band-stems" / slug
     for sub in ("stems", "midi", "wave", "sheet"):
         (out / sub).mkdir(parents=True, exist_ok=True)
     print(f"{song['title']}: {total_beats / 4:.0f} bars, {total_beats * 60 / bpm:.0f}s; rendering…")
     import samplers
     recordings = [d.name for d in sorted((REPO / "band-stems").iterdir())
-                  if (d / "info.json").exists() and not d.name.startswith("Test song")]
+                  if (d / "info.json").exists() and json.loads((d / "info.json").read_text()).get("mode") != "composed"]
     plan = {"bass": [(r, "bass", "note") for r in recordings],
             "horns": [(r, "horns", "note") for r in recordings],
             "guitar": [(r, "guitar", "stab") for r in recordings],
@@ -582,6 +582,7 @@ def main():
         "stem_levels_db": {p: studio.stem_level(b) for p, b in stems.items()},
         "drum_hits": {}, "midi": sorted(f.name for f in (out / "midi").glob("*.mid")), "kit": {},
         "phrases": [], "groove": groove, "sounds": used,
+        "sections": [{"name": n, "start_s": round(b * 60 / bpm, 3)} for n, b in starts],
     }
     (out / "info.json").write_text(json.dumps(info, indent=2))
     studio.report_page(out, slug, info, stems, mix)

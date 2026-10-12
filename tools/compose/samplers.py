@@ -165,7 +165,20 @@ class StabSampler:
 
 
 def build(repo, plan):
-    """plan: {part: [(song folder, stem name, sampler kind)]} -> {part: sampler or None}"""
+    """plan: {part: [(song folder, stem name, sampler kind)]} -> {part: sampler or None}
+
+    Harvesting runs a pitch tracker over every candidate note (minutes on a CPU), so the result
+    is cached and reused until a source stem or transcription changes."""
+    import hashlib
+    import pickle
+    stamp = hashlib.sha256(repr(sorted(
+        (str(f), f.stat().st_mtime) for part in plan.values() for song, stem, _ in part
+        for f in [Path(repo) / "band-stems" / song / "stems" / f"{stem}.wav"] if f.exists())).encode()).hexdigest()
+    cache = Path(repo) / "band-stems" / ".sampler-cache.pkl"
+    if cache.exists():
+        saved = pickle.loads(cache.read_bytes())
+        if saved.get("stamp") == stamp:
+            return saved["samplers"]
     out = {}
     for part, sources in plan.items():
         kind = sources[0][2]
@@ -180,4 +193,5 @@ def build(repo, plan):
                 continue
             sampler.harvest(wav, midi)
         out[part] = sampler if len(sampler) else None
+    cache.write_bytes(pickle.dumps({"stamp": stamp, "samplers": out}))
     return out

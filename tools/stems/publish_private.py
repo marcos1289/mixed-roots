@@ -87,12 +87,20 @@ def main():
         written.add(name)
         return {"id": name, "type": mime, "bytes": len(data)}
 
+    batch_nums = sorted({int(p.name.split()[1]) for p in STEMS.iterdir() if p.name.startswith("Batch ")})
+    recent_batches = set(batch_nums[-2:])
     songs = []
-    for d in sorted(p for p in STEMS.iterdir() if (p / "info.json").exists()):
+    for d in sorted((p for p in STEMS.iterdir() if (p / "info.json").exists()),
+                    key=lambda p: (not p.name.startswith("Batch"), p.name), reverse=False):
         info = json.loads((d / "info.json").read_text())
+        generated = d.name.startswith("Batch ")
+        if generated and int(d.name.split()[1]) not in recent_batches:
+            continue                    # older batches: their hooks stay on Compare, full songs retire
         print("sealing", info["title"])
         tracks = []
-        for name in ["mix"] + STEM_ORDER:
+        # generated variants publish the mix and vocal only; all 8 stems per variant would add
+        # ~25 MB to the repo per song, every batch
+        for name in ["mix", "vocals"] if generated else ["mix"] + STEM_ORDER:
             src = d / ("mix.wav" if name == "mix" else f"stems/{name}.wav")
             m4a = tmp / f"{name}.m4a"
             encode_aac(src, m4a)
@@ -118,7 +126,28 @@ def main():
                       "tracks": tracks, "downloads": downloads})
     shutil.rmtree(tmp, ignore_errors=True)
 
-    manifest = json.dumps({"songs": songs}).encode()
+    batches = []
+    for bf in sorted((STEMS / "_batches").glob("batch-*.json")) if (STEMS / "_batches").exists() else []:
+        batch = json.loads(bf.read_text())
+        variants = []
+        for v in batch["variants"]:
+            hook = STEMS / v["folder"] / "hook.wav"
+            if not hook.exists():
+                continue
+            m4a = tmp / f"hook-{v['folder']}.m4a"
+            tmp.mkdir(exist_ok=True)
+            encode_aac(hook, m4a)
+            p = v["params"]
+            variants.append({"id": v["id"], "folder": v["folder"], "hook": seal(m4a.read_bytes(), "audio/mp4"),
+                             "summary": f"{p['groove']} · {p['tempo']} BPM · {p['key']} · horns {p['horns']}"
+                                        f" · {p['perc']} perc · {p['bridge']} bridge"})
+        if len(variants) >= 2:
+            ids = {v["id"] for v in variants}
+            batches.append({"id": batch["id"], "created": batch["created"], "variants": variants,
+                            "pairs": [pr for pr in batch["pairs"] if set(pr) <= ids]})
+    shutil.rmtree(tmp, ignore_errors=True)
+    manifest = json.dumps({"songs": songs, "batches": batches,
+                           "repo": "marcos1289/mixed-roots"}).encode()
     nonce = secrets.token_bytes(12)
     (out / "manifest.bin").write_bytes(nonce + aes.encrypt(nonce, manifest, None))
     for f in (out / "f").iterdir():

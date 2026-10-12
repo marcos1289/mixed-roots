@@ -163,3 +163,49 @@ def percussion(style):
                  (13, "conga_hi", 70), (15, "conga_hi", 82)]
         out += [(at(s), DRUM[k], v) for s, k, v in conga]
     return out
+
+
+# ---------------------------------------------------------------- SoCal / Slightly Stoopid
+# socal_slightly_stoopid.md grid B: kick 1, &2, 3, &4; snare backbeat on 2 and 4; straight 16th
+# hats with ghosts. Their records sit at 82-100 BPM (2am 82, Collie Man 85, Officer 95).
+DRUM_GRIDS["stoopid"] = {
+    "kick": [(1, 108), (7, 88), (9, 104), (15, 86)],
+    "snare": [(5, 104), (13, 106)], "rim": [(9, 36)],
+    "hat": [(s, 84 if s % 4 == 1 else (70 if s % 2 else 40)) for s in range(1, 17)],
+}
+# Marley-hit style: kick on every beat with the rim on 3 and busy 16th hats ("Is This Love",
+# "Jamming", "Buffalo Soldier" feel)
+DRUM_GRIDS["marley_four"] = {
+    "kick": [(1, 100), (5, 96), (9, 102), (13, 96)], "rim": [(9, 100), (16, 36)],
+    "hat": [(s, 80 if s % 4 == 1 else (64 if s % 2 else 42)) for s in range(1, 17)],
+}
+SWING.update({"stoopid": 50, "marley_four": 54})
+BASS_FOR_DRUMS.update({"stoopid": "stoopid", "marley_four": "rockers"})
+# busier melodic riff that lands on beat 1 with the kick
+BASS_RIFFS["stoopid"] = [
+    [(1, 0, 2, 106), (4, 0, 1, 80), (5, 7, 1, 88), (7, 0, 2, 96), (9, 12, 1, 92), (10, 10, 1, 82),
+     (11, 7, 2, 90), (13, 5, 1, 86), (15, 3, 2, 90)],
+    [(1, 0, 2, 106), (4, 0, 1, 80), (5, 7, 1, 88), (7, 0, 2, 96), (9, 5, 2, 96), (11, 7, 1, 88),
+     (12, 10, 1, 84), (13, 12, 2, 98), (15, 7, 1, 84)],
+]
+
+# Chord loops by scale degree (roman numerals resolved in evolve.py against the key).
+PROGRESSIONS = {
+    "minor": [["i", "i", "bVII", "bVII"], ["i", "iv", "i", "iv"], ["bVI", "bVII", "i", "i"],
+              ["i", "IV", "i", "IV"], ["i", "bVII", "bVI", "bVII"]],
+    "major": [["I", "IV", "I", "IV"], ["I", "bVII", "IV", "I"], ["I", "V", "vi", "IV"],
+              ["I", "I", "IV", "IV"], ["IV", "V", "I", "I"]],
+}
+NUMERALS = {"i": (0, "m"), "I": (0, ""), "ii": (2, "m"), "iv": (5, "m"), "IV": (5, ""), "V": (7, ""),
+            "v": (7, "m"), "vi": (9, "m"), "bVI": (8, ""), "bVII": (10, ""), "bIII": (3, "")}
+
+# Horn riffs as (start step within the 2-bar riff, scale degree index (0 = tonic, 7 = octave),
+# length in 16ths). Unison/octave only; written for the 2nd bar of a 2-bar phrase where noted.
+HORN_RIFFS = {
+    "pent_call": [(3, 4, 1), (4, 6, 1), (5, 7, 2), (9, 6, 1), (10, 4, 1), (13, 3, 2), (21, 4, 2),
+                  (23, 3, 2), (25, 4, 6)],
+    "answer": [(19, 4, 1), (20, 5, 2), (22, 4, 2), (24, 3, 3), (27, 2, 1), (28, 3, 1), (29, 0, 2)],
+    "stab": [(7, 7, 1), (11, 7, 1), (23, 6, 1), (27, 7, 2)],
+    "afro": [(1, 7, 2), (3, 7, 1), (4, 6, 3), (7, 4, 2), (9, 3, 2), (11, 4, 6), (19, 2, 1), (20, 3, 1),
+             (21, 4, 6), (29, 6, 2), (31, 7, 1)],
+}

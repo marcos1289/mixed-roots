@@ -43,6 +43,15 @@ h2 { font-size: 15px; text-transform: uppercase; letter-spacing: .08em; color: v
 .dl button { font-size: 13px; padding: 5px 10px; border-width: 1px; font-weight: 500; }
 .back { margin-bottom: 8px; }
 .status { color: var(--soft); }
+.tabs { display: flex; gap: 8px; margin: 0 0 16px; }
+.tabs button[aria-selected="true"] { background: var(--green); color: var(--cream); }
+.duel { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+.duel .card { text-align: center; }
+.duel .big { font-size: 42px; font-weight: 700; margin: 4px 0 10px; }
+.votes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.votes button { padding: 12px; }
+textarea { width: 100%; font: inherit; border: 1.5px solid var(--line); border-radius: 8px; padding: 8px; }
+.reveal { font-size: 14px; color: var(--soft); }
 @media (max-width: 640px) {
   .row { grid-template-columns: 1fr 44px 44px; }
   .row .wave { grid-column: 1 / -1; }
@@ -62,6 +71,32 @@ h2 { font-size: 15px; text-transform: uppercase; letter-spacing: .08em; color: v
       <button class="primary" type="submit" id="unlock">Unlock</button>
       <p class="error" id="error" role="alert"></p>
     </form>
+  </section>
+  <nav class="tabs" id="tabs" hidden>
+    <button type="button" data-tab="library" aria-selected="true">Recordings</button>
+    <button type="button" data-tab="compare">Compare hooks</button>
+  </nav>
+  <section id="compare" hidden>
+    <h1 style="margin-top:0">Which hook is catchier?</h1>
+    <p class="status" id="cmp-status"></p>
+    <div id="cmp-key" class="card" hidden>
+      <p>To save your picks, paste the band's GitHub access key once on this device.</p>
+      <input id="gh-key" type="password" placeholder="github_pat_…" style="width:100%;padding:10px;border-radius:8px;border:1.5px solid var(--line)">
+      <p><label>Your name <input id="who" style="padding:8px;border-radius:8px;border:1.5px solid var(--line)"></label></p>
+      <button class="primary" id="save-key">Save</button>
+    </div>
+    <div id="cmp-body" hidden>
+      <div class="duel">
+        <div class="card"><div class="big">A</div><button class="primary" data-play="0">Play A</button></div>
+        <div class="card"><div class="big">B</div><button class="primary" data-play="1">Play B</button></div>
+      </div>
+      <div class="votes">
+        <button data-vote="a">A is catchier</button><button data-vote="b">B is catchier</button>
+        <button data-vote="tie">Both good</button><button data-vote="both_bad">Neither works</button>
+      </div>
+      <p><textarea id="note" rows="2" placeholder="Optional note: too slow, love the horns, bass is weak…"></textarea></p>
+      <p class="reveal" id="reveal"></p>
+    </div>
   </section>
   <section id="library" hidden>
     <h1>Separated recordings</h1>
@@ -94,7 +129,7 @@ const toB64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
 async function deriveKey(password) {
   const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"]);
   return crypto.subtle.deriveKey({ name: "PBKDF2", salt: b64(PARAMS.salt), iterations: PARAMS.iterations, hash: "SHA-256" },
-    base, { name: "AES-GCM", length: 256 }, true, ["decrypt"]);
+    base, { name: "AES-GCM", length: 256 }, true, ["decrypt", "encrypt"]);
 }
 
 async function open(url) {
@@ -113,6 +148,7 @@ async function unlockWith(k) {
   manifest = JSON.parse(new TextDecoder().decode(await open("manifest.bin")));
   $("#login").hidden = true;
   $("#logout").hidden = false;
+  $("#tabs").hidden = !(manifest.batches || []).length;
   showLibrary();
 }
 
@@ -140,6 +176,7 @@ function fmt(t) { return Math.floor(t / 60) + ":" + String(Math.floor(t % 60)).p
 
 function showLibrary() {
   stopAll();
+  $("#compare").hidden = true;
   $("#song").hidden = true;
   $("#library").hidden = false;
   $("#songs").replaceChildren(...manifest.songs.map((s, i) => {
@@ -225,6 +262,88 @@ $("#clear").onclick = () => {
 };
 $("#back").onclick = showLibrary;
 
+/* ---------- compare hooks (blind A/B) ---------- */
+const GH_STORE = "mr-studio-gh", WHO_STORE = "mr-studio-who", DONE_STORE = "mr-studio-done";
+let cmp = null, cmpAudio = [];
+document.querySelectorAll("[data-tab]").forEach((t) => t.addEventListener("click", () => {
+  document.querySelectorAll("[data-tab]").forEach((x) => x.setAttribute("aria-selected", x === t));
+  if (t.dataset.tab === "library") showLibrary(); else showCompare();
+}));
+const store = { get: (k) => { try { return localStorage.getItem(k); } catch { return null; } },
+                set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
+
+function showCompare() {
+  stopAll();
+  $("#library").hidden = true; $("#song").hidden = true; $("#compare").hidden = false;
+  if (!store.get(GH_STORE)) { $("#cmp-key").hidden = false; $("#cmp-body").hidden = true; return; }
+  $("#cmp-key").hidden = true;
+  nextPair();
+}
+$("#save-key").onclick = () => {
+  const k = $("#gh-key").value.trim();
+  if (!k.startsWith("github_pat_") && !k.startsWith("ghp_")) { alert("That doesn't look like a GitHub key."); return; }
+  store.set(GH_STORE, k); store.set(WHO_STORE, $("#who").value.trim() || "anon");
+  showCompare();
+};
+
+async function nextPair() {
+  const batch = manifest.batches[manifest.batches.length - 1];
+  const done = new Set(JSON.parse(store.get(DONE_STORE) || "[]"));
+  const left = batch.pairs.filter(([a, b]) => !done.has(`${batch.id}:${a}${b}`));
+  cmpAudio.forEach((a) => a.pause());
+  if (!left.length) {
+    $("#cmp-body").hidden = true;
+    $("#cmp-status").textContent = `All ${batch.pairs.length} pairs in ${batch.id} rated. Thank you! New hooks will appear after the next batch.`;
+    return;
+  }
+  const [a, b] = left[Math.floor(Math.random() * left.length)];
+  const swap = Math.random() < 0.5;                    // random sides: no position bias
+  const byId = Object.fromEntries(batch.variants.map((v) => [v.id, v]));
+  cmp = { batch, a, b, shown: swap ? [byId[b], byId[a]] : [byId[a], byId[b]] };
+  $("#cmp-status").textContent = `${batch.id}: pair ${batch.pairs.length - left.length + 1} of ${batch.pairs.length}. Listen to both, then pick.`;
+  $("#reveal").textContent = "";
+  $("#note").value = "";
+  $("#cmp-body").hidden = false;
+  cmpAudio = await Promise.all(cmp.shown.map(async (v) => new Audio(await blobUrl(v.hook))));
+  cmpAudio.forEach((au, i) => au.addEventListener("ended", () => { $(`[data-play="${i}"]`).textContent = `Play ${"AB"[i]}`; }));
+}
+
+document.querySelectorAll("[data-play]").forEach((btn) => btn.onclick = () => {
+  const i = +btn.dataset.play;
+  cmpAudio.forEach((a, j) => { if (j !== i) { a.pause(); $(`[data-play="${j}"]`).textContent = `Play ${"AB"[j]}`; } });
+  const au = cmpAudio[i];
+  if (au.paused) { au.currentTime = 0; au.play(); btn.textContent = "Stop"; } else { au.pause(); btn.textContent = `Play ${"AB"[i]}`; }
+});
+
+document.querySelectorAll("[data-vote]").forEach((btn) => btn.onclick = async () => {
+  if (!cmp) return;
+  let choice = btn.dataset.vote;                       // a/b refer to the sides shown
+  if (choice === "a" || choice === "b") choice = cmp.shown["ab".indexOf(choice)].id === cmp.a ? "a" : "b";
+  const rating = { batch: cmp.batch.id, a: cmp.a, b: cmp.b, choice, note: $("#note").value.trim(),
+                   who: store.get(WHO_STORE) || "anon", at: new Date().toISOString() };
+  document.querySelectorAll("[data-vote]").forEach((x) => (x.disabled = true));
+  $("#reveal").textContent = "Saving…";
+  try {
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(JSON.stringify(rating)));
+    const bytes = new Uint8Array(12 + ct.byteLength); bytes.set(iv); bytes.set(new Uint8Array(ct), 12);
+    let bin = ""; bytes.forEach((x) => (bin += String.fromCharCode(x)));
+    const path = `feedback/${rating.batch}-${cmp.a}${cmp.b}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}.bin`;
+    const res = await fetch(`https://api.github.com/repos/${manifest.repo}/contents/${path}`, {
+      method: "PUT", headers: { Authorization: `Bearer ${store.get(GH_STORE)}`, Accept: "application/vnd.github+json" },
+      body: JSON.stringify({ message: "Studio rating", content: btoa(bin) }) });
+    if (!res.ok) throw new Error(`GitHub ${res.status}`);
+    const done = JSON.parse(store.get(DONE_STORE) || "[]"); done.push(`${cmp.batch.id}:${cmp.a}${cmp.b}`);
+    store.set(DONE_STORE, JSON.stringify(done));
+    $("#reveal").textContent = `Saved. A was: ${cmp.shown[0].summary}. B was: ${cmp.shown[1].summary}.`;
+    setTimeout(nextPair, 3500);
+  } catch (e) {
+    $("#reveal").textContent = `Couldn't save (${e.message}). Check the access key and try again.`;
+    if (String(e.message).includes("401")) { try { localStorage.removeItem(GH_STORE); } catch {} }
+  }
+  document.querySelectorAll("[data-vote]").forEach((x) => (x.disabled = false));
+});
+
 setInterval(() => {
   if (!tracks.length) return;
   const m = tracks[0].audio, t = m.currentTime, d = m.duration || 1;
@@ -259,7 +378,7 @@ function renderDownloads(s) {
   try { saved = localStorage.getItem(KEY_STORE); } catch {}
   if (saved) {
     try {
-      const k = await crypto.subtle.importKey("raw", b64(saved), { name: "AES-GCM" }, true, ["decrypt"]);
+      const k = await crypto.subtle.importKey("raw", b64(saved), { name: "AES-GCM" }, true, ["decrypt", "encrypt"]);
       return await unlockWith(k);
     } catch { try { localStorage.removeItem(KEY_STORE); } catch {} }
   }

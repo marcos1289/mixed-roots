@@ -3,6 +3,7 @@ name: Build and deploy site
 on:
   push:
     branches: [main]
+    paths-ignore: ["feedback/**"]   # studio ratings shouldn't rebuild the site
   workflow_dispatch:
   schedule:
     - cron: "17 9 * * *"   # daily, so past shows leave "Upcoming" on their own
