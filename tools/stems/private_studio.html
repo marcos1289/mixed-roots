@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="referrer" content="no-referrer">
+<title>Studio</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<style>
+:root { --cream:#f4f0e6; --green:#172c24; --lime:#d8eb8b; --orange:#bf5834; --line:#172c2426; --soft:#172c24a6; }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--cream); color: var(--green); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+header { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 18px; background: var(--green); color: var(--cream); position: sticky; top: 0; z-index: 3; }
+header strong span { color: var(--lime); font-weight: 400; }
+button { font: inherit; color: inherit; cursor: pointer; border: 1.5px solid var(--green); background: #fff; border-radius: 99px; padding: 7px 14px; font-weight: 600; }
+button:disabled { opacity: .5; cursor: default; }
+header button { background: none; color: var(--cream); border-color: var(--cream); padding: 4px 12px; }
+.primary { background: var(--green); color: var(--cream); }
+main { max-width: 1200px; margin: 0 auto; padding: 18px; }
+.card { background: #fff; border-radius: 12px; padding: 20px; }
+.narrow { max-width: 400px; margin: 48px auto; }
+input[type=password] { width: 100%; font: inherit; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 8px; margin: 6px 0 10px; }
+.check { display: flex; gap: 8px; align-items: center; font-size: 15px; margin-bottom: 14px; }
+.error { color: #b3261e; font-weight: 600; min-height: 1.2em; }
+.songs { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.songs button { width: 100%; text-align: left; border-radius: 12px; padding: 14px 16px; border-width: 1px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.songs small { color: var(--soft); font-weight: 400; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 14px; }
+.facts span { background: #fff; border-radius: 8px; padding: 5px 10px; font-size: 14px; }
+.transport { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; position: sticky; top: 58px; z-index: 2; background: var(--cream); padding: 8px 0; }
+#time { font-variant-numeric: tabular-nums; min-width: 84px; }
+.row { display: grid; grid-template-columns: 120px 40px 40px 1fr; gap: 8px; align-items: center; margin: 6px 0; }
+.row .label strong { text-transform: capitalize; display: block; }
+.row .label span { font-size: 12px; color: var(--soft); }
+.row button { padding: 6px 0; border-radius: 8px; }
+.row button.on { background: var(--orange); border-color: var(--orange); color: #fff; }
+.wave { height: 52px; border-radius: 8px; background: #fff center / 100% 100% no-repeat; position: relative; cursor: pointer; }
+.head { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--orange); left: 0; }
+h2 { font-size: 15px; text-transform: uppercase; letter-spacing: .08em; color: var(--soft); margin: 26px 0 8px; }
+.dl { display: flex; flex-wrap: wrap; gap: 6px; }
+.dl button { font-size: 13px; padding: 5px 10px; border-width: 1px; font-weight: 500; }
+.back { margin-bottom: 8px; }
+.status { color: var(--soft); }
+@media (max-width: 640px) {
+  .row { grid-template-columns: 1fr 44px 44px; }
+  .row .wave { grid-column: 1 / -1; }
+  .transport { top: 54px; }
+}
+</style>
+</head>
+<body>
+<header><strong>Mixed Roots <span>studio</span></strong><button id="logout" hidden>Log out</button></header>
+<main>
+  <section id="login" class="card narrow" hidden>
+    <h1 style="margin-top:0">Studio</h1>
+    <form id="login-form">
+      <label for="pw">Password</label>
+      <input id="pw" type="password" autocomplete="current-password" required>
+      <label class="check"><input type="checkbox" id="remember" checked> Remember on this device</label>
+      <button class="primary" type="submit" id="unlock">Unlock</button>
+      <p class="error" id="error" role="alert"></p>
+    </form>
+  </section>
+  <section id="library" hidden>
+    <h1>Separated recordings</h1>
+    <ul class="songs" id="songs"></ul>
+  </section>
+  <section id="song" hidden>
+    <button class="back" id="back">← All recordings</button>
+    <h1 id="song-title" style="margin:6px 0 0"></h1>
+    <div class="facts" id="facts"></div>
+    <div class="transport">
+      <button class="primary" id="play" disabled>Play</button>
+      <button id="stop">Stop</button>
+      <span id="time">0:00</span>
+      <button id="clear">Clear solo/mute</button>
+      <span class="status" id="status"></span>
+    </div>
+    <div id="rows"></div>
+    <div id="downloads"></div>
+  </section>
+</main>
+<script>
+const PARAMS = __PARAMS__;
+const KEY_STORE = "mr-studio-key";
+const $ = (s) => document.querySelector(s);
+let key = null, manifest = null, ctx = null, tracks = [], playing = false, urls = [];
+
+const b64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+const toB64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
+
+async function deriveKey(password) {
+  const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({ name: "PBKDF2", salt: b64(PARAMS.salt), iterations: PARAMS.iterations, hash: "SHA-256" },
+    base, { name: "AES-GCM", length: 256 }, true, ["decrypt"]);
+}
+
+async function open(url) {
+  const buf = await (await fetch(url, { cache: "no-cache" })).arrayBuffer();
+  return crypto.subtle.decrypt({ name: "AES-GCM", iv: buf.slice(0, 12) }, key, buf.slice(12));
+}
+
+async function blobUrl(ref) {
+  const url = URL.createObjectURL(new Blob([await open("f/" + ref.id)], { type: ref.type }));
+  urls.push(url);
+  return url;
+}
+
+async function unlockWith(k) {
+  key = k;
+  manifest = JSON.parse(new TextDecoder().decode(await open("manifest.bin")));
+  $("#login").hidden = true;
+  $("#logout").hidden = false;
+  showLibrary();
+}
+
+$("#login-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  $("#error").textContent = "";
+  $("#unlock").disabled = true;
+  $("#unlock").textContent = "Unlocking…";
+  try {
+    const k = await deriveKey($("#pw").value);
+    await unlockWith(k);
+    if ($("#remember").checked) {
+      try { localStorage.setItem(KEY_STORE, toB64(await crypto.subtle.exportKey("raw", k))); } catch {}
+    }
+  } catch {
+    $("#error").textContent = "That password didn't work.";
+  }
+  $("#unlock").disabled = false;
+  $("#unlock").textContent = "Unlock";
+});
+
+$("#logout").addEventListener("click", () => { try { localStorage.removeItem(KEY_STORE); } catch {} location.reload(); });
+
+function fmt(t) { return Math.floor(t / 60) + ":" + String(Math.floor(t % 60)).padStart(2, "0"); }
+
+function showLibrary() {
+  stopAll();
+  $("#song").hidden = true;
+  $("#library").hidden = false;
+  $("#songs").replaceChildren(...manifest.songs.map((s, i) => {
+    const li = document.createElement("li");
+    const b = document.createElement("button");
+    b.innerHTML = `<strong></strong><small></small>`;
+    b.querySelector("strong").textContent = s.title;
+    b.querySelector("small").textContent = `${s.tempo} BPM · ${s.key} · ${fmt(s.duration)}`;
+    b.onclick = () => showSong(i);
+    li.append(b);
+    return li;
+  }));
+}
+
+function stopAll() {
+  playing = false;
+  tracks.forEach((t) => { t.audio.pause(); });
+  tracks = [];
+  urls.forEach(URL.revokeObjectURL);
+  urls = [];
+}
+
+async function showSong(i) {
+  const s = manifest.songs[i];
+  $("#library").hidden = true;
+  $("#song").hidden = false;
+  $("#song-title").textContent = s.title;
+  $("#facts").replaceChildren(...[
+    `Tempo ≈ ${s.tempo} BPM`, `Key ≈ ${s.key}`, `Length ${fmt(s.duration)}`,
+    `Stems = ${s.reconstruction}% of the mix`, s.swing != null ? `Swing ${s.swing}%` : null,
+  ].filter(Boolean).map((t) => Object.assign(document.createElement("span"), { textContent: t })));
+  $("#play").disabled = true;
+  $("#play").textContent = "Play";
+  $("#status").textContent = `Unlocking ${s.tracks.length} tracks…`;
+  $("#rows").replaceChildren();
+  ctx ||= new (window.AudioContext || window.webkitAudioContext)();
+  const loaded = await Promise.all(s.tracks.map(async (t) => ({ ...t, src: await blobUrl(t.audio), img: await blobUrl(t.wave) })));
+  tracks = loaded.map((t) => {
+    const row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML = `<div class="label"><strong></strong><span></span></div><button class="mute" title="Mute">M</button>
+      <button class="solo" title="Solo">S</button><div class="wave"><div class="head"></div></div>`;
+    row.querySelector("strong").textContent = t.name;
+    row.querySelector("span").textContent = t.level != null ? `${t.level} dB` : "";
+    row.querySelector(".wave").style.backgroundImage = `url(${t.img})`;
+    const audio = new Audio(t.src);
+    audio.preload = "auto";
+    // Route through Web Audio: iOS ignores HTMLMediaElement.volume, but honours a GainNode.
+    const gain = ctx.createGain();
+    ctx.createMediaElementSource(audio).connect(gain).connect(ctx.destination);
+    const track = { name: t.name, row, audio, gain, muted: t.name === "mix", solo: false };
+    if (track.muted) row.querySelector(".mute").classList.add("on");
+    row.querySelector(".mute").onclick = () => { track.muted = !track.muted; row.querySelector(".mute").classList.toggle("on", track.muted); applyGains(); };
+    row.querySelector(".solo").onclick = () => { track.solo = !track.solo; row.querySelector(".solo").classList.toggle("on", track.solo); applyGains(); };
+    row.querySelector(".wave").onclick = (e) => { const b = e.currentTarget.getBoundingClientRect(); seek((e.clientX - b.left) / b.width * (tracks[0].audio.duration || 0)); };
+    $("#rows").append(row);
+    return track;
+  });
+  applyGains();
+  renderDownloads(s);
+  $("#status").textContent = "";
+  $("#play").disabled = false;
+}
+
+function applyGains() {
+  const anySolo = tracks.some((t) => t.solo);
+  tracks.forEach((t) => { t.gain.gain.value = anySolo ? (t.solo ? 1 : 0) : (t.muted ? 0 : 1); });
+}
+
+function seek(t) { tracks.forEach((x) => { x.audio.currentTime = t; }); }
+
+$("#play").onclick = async () => {
+  await ctx.resume();
+  playing = !playing;
+  if (playing) { const t = tracks[0].audio.currentTime; seek(t); await Promise.all(tracks.map((x) => x.audio.play())); }
+  else tracks.forEach((x) => x.audio.pause());
+  $("#play").textContent = playing ? "Pause" : "Play";
+};
+$("#stop").onclick = () => { playing = false; tracks.forEach((x) => { x.audio.pause(); x.audio.currentTime = 0; }); $("#play").textContent = "Play"; };
+$("#clear").onclick = () => {
+  tracks.forEach((t) => { t.solo = false; t.muted = t.name === "mix"; t.row.querySelector(".solo").classList.remove("on"); t.row.querySelector(".mute").classList.toggle("on", t.muted); });
+  applyGains();
+};
+$("#back").onclick = showLibrary;
+
+setInterval(() => {
+  if (!tracks.length) return;
+  const m = tracks[0].audio, t = m.currentTime, d = m.duration || 1;
+  $("#time").textContent = `${fmt(t)} / ${fmt(d)}`;
+  tracks.forEach((x) => { x.row.querySelector(".head").style.left = (t / d * 100) + "%"; });
+  if (playing) tracks.forEach((x) => { if (Math.abs(x.audio.currentTime - t) > 0.05) x.audio.currentTime = t; });
+  if (m.ended) { playing = false; $("#play").textContent = "Play"; }
+}, 150);
+
+function renderDownloads(s) {
+  const groups = {};
+  s.downloads.forEach((d) => (groups[d.group] ||= []).push(d));
+  $("#downloads").replaceChildren(...Object.entries(groups).flatMap(([g, items]) => {
+    const h = Object.assign(document.createElement("h2"), { textContent: g });
+    const box = Object.assign(document.createElement("div"), { className: "dl" });
+    items.forEach((d) => {
+      const b = Object.assign(document.createElement("button"), { textContent: d.name });
+      b.onclick = async () => {
+        b.disabled = true;
+        const a = Object.assign(document.createElement("a"), { href: await blobUrl(d), download: d.name });
+        document.body.append(a); a.click(); a.remove();
+        b.disabled = false;
+      };
+      box.append(b);
+    });
+    return [h, box];
+  }));
+}
+
+(async () => {
+  let saved = null;
+  try { saved = localStorage.getItem(KEY_STORE); } catch {}
+  if (saved) {
+    try {
+      const k = await crypto.subtle.importKey("raw", b64(saved), { name: "AES-GCM" }, true, ["decrypt"]);
+      return await unlockWith(k);
+    } catch { try { localStorage.removeItem(KEY_STORE); } catch {} }
+  }
+  $("#login").hidden = false;
+})();
+</script>
+</body>
+</html>

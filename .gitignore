@@ -9,3 +9,4 @@ band-audio/
 band-stems/
 tools/stems/.venv/
 tools/stems/models/
+.studio-password
