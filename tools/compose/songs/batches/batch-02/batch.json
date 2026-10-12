@@ -1,0 +1,116 @@
+{
+  "id": "batch-02",
+  "created": "2026-10-12 12:41",
+  "variants": [
+    {
+      "id": "A",
+      "folder": "Batch 02 - A",
+      "params": {
+        "groove": "rockers",
+        "tempo": 88,
+        "key": "E minor",
+        "progression": 1,
+        "skank": "double",
+        "horns": "stabs",
+        "perc": "shekere",
+        "bridge": "dub",
+        "melody_sync": 0.15,
+        "keys": "hammond+piano"
+      },
+      "catchiness": {
+        "verse": 0.633,
+        "chorus": 0.769,
+        "bridge": 0.813
+      }
+    },
+    {
+      "id": "B",
+      "folder": "Batch 02 - B",
+      "params": {
+        "groove": "rockers",
+        "tempo": 100,
+        "key": "E minor",
+        "progression": 2,
+        "skank": "single",
+        "horns": "riff_everywhere",
+        "perc": "shekere",
+        "bridge": "dub",
+        "melody_sync": 0.3,
+        "keys": "hammond"
+      },
+      "catchiness": {
+        "verse": 0.679,
+        "chorus": 0.77,
+        "bridge": 0.78
+      }
+    },
+    {
+      "id": "C",
+      "folder": "Batch 02 - C",
+      "params": {
+        "groove": "steppers",
+        "tempo": 88,
+        "key": "D minor",
+        "progression": 3,
+        "skank": "double",
+        "horns": "stabs",
+        "perc": "shekere",
+        "bridge": "dub",
+        "melody_sync": 0.15,
+        "keys": "hammond"
+      },
+      "catchiness": {
+        "verse": 0.745,
+        "chorus": 0.777,
+        "bridge": 0.821
+      }
+    },
+    {
+      "id": "D",
+      "folder": "Batch 02 - D",
+      "params": {
+        "groove": "onedrop",
+        "tempo": 82,
+        "key": "D minor",
+        "progression": 3,
+        "skank": "single",
+        "horns": "stabs",
+        "perc": "shekere",
+        "bridge": "dub",
+        "melody_sync": 0.15,
+        "keys": "hammond"
+      },
+      "catchiness": {
+        "verse": 0.695,
+        "chorus": 0.774,
+        "bridge": 0.796
+      }
+    }
+  ],
+  "pairs": [
+    [
+      "A",
+      "B"
+    ],
+    [
+      "A",
+      "C"
+    ],
+    [
+      "A",
+      "D"
+    ],
+    [
+      "B",
+      "C"
+    ],
+    [
+      "B",
+      "D"
+    ],
+    [
+      "C",
+      "D"
+    ]
+  ]
+}

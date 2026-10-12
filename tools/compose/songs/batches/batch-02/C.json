@@ -1,0 +1,200 @@
+{
+  "title": "Common Ground",
+  "subtitle": "steppers groove, 88 BPM, D minor",
+  "key": "D minor",
+  "bpm": 88,
+  "groove": "band-stems/troy_night_out_-_mixed_roots_502/groove.json",
+  "kit": {
+    "kick": "band-stems/troy_night_out_-_mixed_roots_502/kit/kick_04.wav",
+    "snare": "band-stems/troy_night_out_-_mixed_roots_502/kit/snare_01.wav",
+    "hat": "band-stems/troy_night_out_-_mixed_roots_502/kit/hat_01.wav"
+  },
+  "voice": "Daniel",
+  "vocal_transpose": 0,
+  "horns_transpose": 0,
+  "sections": [
+    {
+      "name": "Intro",
+      "chords": [
+        "Dm",
+        "G",
+        "Dm",
+        "G"
+      ],
+      "drums": "steppers",
+      "fill": true,
+      "skank": true,
+      "horns": "r/1.5 D5/0.25 r/0.75 D5/0.25 r/2.75 C5/0.25 r/0.75 D5/0.5 r/2.5 D5/0.25 r/0.75 D5/0.25 r/2.75 C5/0.25 r/0.75 D5/0.5 r/1"
+    },
+    {
+      "name": "Verse 1",
+      "chords": [
+        "Dm",
+        "G",
+        "Dm",
+        "G",
+        "Dm",
+        "G",
+        "Dm",
+        "G"
+      ],
+      "drums": "steppers",
+      "skank": true,
+      "double_chop": true,
+      "bubble": true,
+      "perc": "shekere",
+      "vocals": "r/1 A3/0.5 A3/0.5 F3/0.5 E3/0.5 F3/0.5 F3/0.25 F3/0.75 E3/0.5 D3/0.5 D3/0.25 D3/0.5 E3/0.5 r/1.25 r/0.5 F3/0.5 F3/0.5 D3/0.5 F3/0.5 G3/0.5 A3/0.5 G3/0.5 G3/0.5 F3/0.5 D3/0.5 D3/0.5 A3/0.5 r/1.5 A3/0.75 G3/0.5 A3/0.5 D4/0.75 C4/0.5 F4/0.5 G4/0.5 G4/1 G4/0.5 F4/0.5 D4/1 r/1 r/0.5 F3/0.25 F3/0.75 D3/0.5 F3/0.5 G3/0.5 A3/0.5 G3/0.5 G3/0.25 A3/0.5 D3/0.5 D3/0.5 D3/0.5 D3/0.5 D3/0.5 r/0.75",
+      "syllables": "From Ac- cra to the Hud- son a long way we came Dif- fer- ent roads beh- ind us but the rhythm's the same La- gos in the keys and the bass from ups- tate E- v- ery drum is a door e- v- ery door is a gate",
+      "lyrics": [
+        "From Accra to the Hudson, a long way we came",
+        "Different roads behind us, but the rhythm's the same",
+        "Lagos in the keys and the bass from upstate",
+        "Every drum is a door, every door is a gate"
+      ],
+      "horns": "r/32"
+    },
+    {
+      "name": "Chorus",
+      "chords": [
+        "Dm",
+        "Dm",
+        "C",
+        "C",
+        "Dm",
+        "Dm",
+        "C",
+        "C"
+      ],
+      "drums": "steppers",
+      "skank": true,
+      "double_chop": true,
+      "bubble": true,
+      "perc": "shekere",
+      "fill": true,
+      "vocals": "r/0.5 A3/0.75 D4/1.75 D4/1.5 E4/1 D4/1.5 r/1 r/1 C4/0.5 E4/0.75 G4/0.5 C4/0.75 C4/0.75 D4/1 C4/1.25 A3/0.75 r/0.75 r/0.5 A3/0.75 D4/1.75 D4/1.5 E4/1 D4/1.5 r/1 r/0.5 C4/0.5 C4/1.5 D4/0.75 E4/0.5 C4/1.25 C4/1 D4/1.25 r/0.75",
+      "syllables": "Mi- xed roots one tree Ma- ny lands in the me- lo- dy Mi- xed roots one sound Come and dance on com- mon ground",
+      "lyrics": [
+        "Mixed roots, one tree",
+        "Many lands in the melody",
+        "Mixed roots, one sound",
+        "Come and dance on common ground"
+      ],
+      "horns": "r/1.5 D5/0.25 r/0.75 D5/0.25 r/2.75 C5/0.25 r/0.75 D5/0.5 r/2.5 D5/0.25 r/0.75 D5/0.25 r/2.75 C5/0.25 r/0.75 D5/0.5 r/2.5 D5/0.25 r/0.75 D5/0.25 r/2.75 C5/0.25 r/0.75 D5/0.5 r/2.5 D5/0.25 r/0.75 D5/0.25 r/2.75 C5/0.25 r/0.75 D5/0.5 r/1"
+    },
+    {
+      "name": "Verse 2",
+      "chords": [
+        "Dm",
+        "G",
+        "Dm",
+        "G",
+        "Dm",
+        "G",
+        "Dm",
+        "G"
+      ],
+      "drums": "steppers",
+      "skank": true,
+      "double_chop": true,
+      "bubble": true,
+      "perc": "shekere",
+      "vocals": "r/0.5 A3/0.5 A3/0.5 D3/0.5 F3/0.5 G3/1 A3/0.75 A3/0.5 A3/0.5 G3/0.5 E3/0.5 F3/0.5 r/1.25 r/0.5 A3/0.5 A3/0.5 D3/0.5 F3/0.5 G3/0.25 A3/0.75 A3/0.25 B3/0.75 A3/0.5 B3/0.5 A3/0.5 A3/0.5 r/1.5 F3/0.5 E3/1 F3/0.75 G3/0.75 F3/0.5 G3/0.5 G3/0.5 F3/0.75 F3/0.5 E3/1 D3/0.5 r/0.75 r/0.5 F3/0.5 F3/0.75 G3/0.5 F3/0.5 F3/0.5 G3/0.5 F3/0.5 G3/0.5 F3/0.75 E3/0.5 G3/0.5 D3/0.5 r/1",
+      "syllables": "Win- ter on Lark Street and the snow com- ing down But the horns keep it warm in the heart of the town Bro- ther on the hand drum sis- ter on the 'bone Play it for the peo- ple you ne- ver play al- one",
+      "lyrics": [
+        "Winter on Lark Street and the snow coming down",
+        "But the horns keep it warm in the heart of the town",
+        "Brother on the hand drum, sister on the 'bone",
+        "Play it for the people, you never play alone"
+      ],
+      "horns": "r/32"
+    },
+    {
+      "name": "Chorus",
+      "chords": "@Chorus",
+      "drums": "steppers",
+      "skank": true,
+      "double_chop": true,
+      "bubble": true,
+      "perc": "shekere",
+      "fill": true,
+      "vocals": "@Chorus",
+      "syllables": "@Chorus",
+      "lyrics": "@Chorus",
+      "horns": "@Chorus"
+    },
+    {
+      "name": "Bridge",
+      "chords": [
+        "Dm",
+        "G",
+        "Dm",
+        "G",
+        "Dm",
+        "G",
+        "Dm",
+        "G"
+      ],
+      "drums": "steppers",
+      "bass": "space",
+      "fill": true,
+      "vocals": "r/1 F3/0.5 F3/1.25 E3/0.75 D3/1 D3/1.25 E3/1 r/1.25 r/0.5 A3/1.25 B3/1.25 A3/1 A3/1 D4/1.5 A3/0.75 r/0.75 r/1 F3/0.5 F3/1.25 E3/0.75 D3/1 D3/1.25 E3/1 r/1.25 r/0.5 F3/1.25 E3/1.25 D3/1 F3/1 F3/1.5 D3/0.75 r/0.75",
+      "syllables": "Mu- sic is love one love Mu- sic is love one love Mu- sic is love one love Mu- sic is love one love",
+      "lyrics": [
+        "Music is love, one love",
+        "Music is love, one love",
+        "Music is love, one love",
+        "Music is love, one love"
+      ],
+      "horns": "r/32",
+      "throws": [
+        [
+          2,
+          "drums",
+          0.8
+        ],
+        [
+          10,
+          "drums",
+          0.8
+        ],
+        [
+          18,
+          "drums",
+          0.8
+        ]
+      ]
+    },
+    {
+      "name": "Chorus",
+      "chords": "@Chorus",
+      "drums": "steppers",
+      "skank": true,
+      "double_chop": true,
+      "bubble": true,
+      "perc": "shekere",
+      "vocals": "@Chorus",
+      "syllables": "@Chorus",
+      "lyrics": "@Chorus",
+      "horns": "@Chorus"
+    },
+    {
+      "name": "Outro",
+      "chords": [
+        "Dm",
+        "G",
+        "Dm",
+        "G"
+      ],
+      "drums": "steppers",
+      "end": true,
+      "skank": true,
+      "horns": "r/1.5 D5/0.25 r/0.75 D5/0.25 r/2.75 C5/0.25 r/0.75 D5/0.5 r/2.5 D5/0.25 r/0.75 D5/0.25 r/2.75 C5/0.25 r/0.75 D5/0.5 r/1"
+    }
+  ],
+  "keys": "hammond",
+  "catchiness": {
+    "verse": 0.745,
+    "chorus": 0.777,
+    "bridge": 0.821
+  }
+}
