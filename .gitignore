@@ -3,3 +3,9 @@ __pycache__/
 *.pyc
 .openai/
 recovery/media/video/*.mp4
+research_notes/
+reports/
+band-audio/
+band-stems/
+tools/stems/.venv/
+tools/stems/models/
