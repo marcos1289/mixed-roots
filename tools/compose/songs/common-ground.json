@@ -9,30 +9,76 @@
     "snare": "band-stems/troy_night_out_-_mixed_roots_502/kit/snare_01.wav",
     "hat": "band-stems/troy_night_out_-_mixed_roots_502/kit/hat_01.wav"
   },
-  "harmony_scale": ["D", "E", "F", "G", "A", "Bb", "C", "C#"],
+  "harmony_scale": [
+    "D",
+    "E",
+    "F",
+    "G",
+    "A",
+    "Bb",
+    "C",
+    "C#"
+  ],
   "sections": [
     {
       "name": "Intro",
-      "chords": ["Dm", "Dm", "Gm", "Gm", "Dm", "Dm", "Bb", "C"],
-      "drums": "onedrop", "bass_from_bar": 5, "skank": true, "fill": true,
+      "chords": [
+        "Dm",
+        "Dm",
+        "Gm",
+        "Gm",
+        "Dm",
+        "Dm",
+        "Bb",
+        "C"
+      ],
+      "drums": "onedrop",
+      "bass_from_bar": 5,
+      "skank": true,
+      "fill": true,
       "horns": "r/1 A4/0.5 D5/0.5 F5/1 E5/0.5 D5/0.5 | C5/1.5 D5/0.5 r/2 | r/1 Bb4/0.5 D5/0.5 G5/1 F5/0.5 D5/0.5 | F5/1.5 G5/0.5 r/2 | A5/1 G5/0.5 F5/0.5 E5/1 D5/1 | F5/0.5 E5/0.5 D5/1 r/2 | r/0.5 D5/0.5 F5/0.5 D5/0.5 C5/1 Bb4/1 | C5/0.5 D5/0.5 E5/1 r/2"
     },
     {
       "name": "Verse 1",
-      "chords": ["Dm", "Dm", "Gm", "Gm", "Dm", "Dm", "Bb", "C"],
-      "drums": "onedrop", "skank": true, "bubble": true,
-      "vocals": "r/0.5 A4/0.5 A4/0.5 C5/0.5 A4/0.5 G4/0.5 F4/0.5 G4/0.5 | A4/0.5 r/0.5 A4/0.5 C5/0.5 D5/0.5 C5/0.5 A4/1 | r/0.5 Bb4/0.5 Bb4/0.5 A4/0.5 G4/0.5 Bb4/0.5 D5/0.5 C5/0.5 | Bb4/0.5 A4/0.5 G4/0.5 A4/0.5 Bb4/0.5 A4/1.5 | r/0.5 F4/0.5 A4/0.5 A4/0.5 C5/0.5 A4/0.5 G4/0.5 A4/0.5 | D5/0.5 C5/0.5 A4/0.5 G4/0.5 F4/1 r/1 | r/0.5 D5/0.5 D5/0.5 C5/0.5 Bb4/0.5 C5/0.5 D5/1 | E5/0.5 E5/0.5 D5/0.5 C5/0.5 D5/1 r/1",
+      "chords": [
+        "Dm",
+        "Dm",
+        "Gm",
+        "Gm",
+        "Dm",
+        "Dm",
+        "Bb",
+        "C"
+      ],
+      "drums": "onedrop",
+      "skank": true,
+      "bubble": true,
+      "vocals": "r/0.5 A4/0.5 A4/0.5 C5/0.5 A4/0.5 G4/0.5 F4/0.5 G4/0.5 | A4/0.5 r/0.5 A4/0.5 C5/0.5 D5/0.5 C5/0.5 A4/1 | r/0.5 Bb4/0.5 Bb4/0.5 A4/0.5 G4/0.5 Bb4/0.5 D5/0.5 C5/0.5 | Bb4/0.5 A4/0.5 G4/0.5 A4/0.5 Bb4/0.5 A4/1.5 | r/0.5 F4/0.5 A4/0.5 A4/0.5 C5/0.5 A4/0.5 G4/0.5 A4/0.5 | D5/0.5 C5/0.5 A4/0.5 G4/0.5 F4/1 r/1 | r/0.5 D5/0.5 D5/0.5 C5/0.5 Bb4/0.5 C5/0.5 D5/1 | E5/0.5 E5/0.5 D5/0.5 C5/0.5 C5/0.5 D5/1 r/0.5",
       "lyrics": [
         "From Accra to the Hudson, a long way we came",
         "Different roads behind us, but the rhythm's the same",
         "Lagos in the keys and the bass from upstate",
         "Every drum is a door, every door is a gate"
-      ]
+      ],
+      "syllables": "From Ac- cra to the Hud- son a long way we came _ Dif- fer- ent roads be- hind us but the rhy- thm's the same La- gos in the keys and the bass from up- state _ Ev- ery drum is a door ev- ery door is a gate"
     },
     {
       "name": "Chorus",
-      "chords": ["Bb", "C", "Dm", "Dm", "Bb", "C", "Dm", "A"],
-      "drums": "onedrop", "skank": true, "bubble": true, "perc": "shaker", "fill": true,
+      "chords": [
+        "Bb",
+        "C",
+        "Dm",
+        "Dm",
+        "Bb",
+        "C",
+        "Dm",
+        "A"
+      ],
+      "drums": "onedrop",
+      "skank": true,
+      "bubble": true,
+      "perc": "shaker",
+      "fill": true,
       "vocals": "F5/1 D5/1 r/0.5 C5/0.5 D5/1 | r/0.5 E5/0.5 E5/0.5 E5/0.5 D5/0.5 C5/0.5 D5/1 | A4/0.5 D5/1.5 r/2 | r/4 | F5/1 D5/1 r/0.5 C5/0.5 D5/1 | r/0.5 C5/0.5 D5/0.5 E5/0.5 F5/0.5 E5/0.5 D5/1 | D5/2 r/2 | r/4",
       "horns": "r/4 | r/4 | r/4 | r/1 A5/0.5 G5/0.5 F5/0.5 E5/0.5 D5/1 | r/4 | r/4 | r/4 | r/1 E5/0.5 F5/0.5 G5/0.5 E5/0.5 C#5/1",
       "lyrics": [
@@ -40,35 +86,77 @@
         "Many lands in the melody",
         "Mixed roots, one sound",
         "Come and dance on common ground"
-      ]
+      ],
+      "syllables": "Mixed roots one tree Ma- ny lands in the mel- o- dy Mixed roots one sound Come and dance on com- mon ground"
     },
     {
       "name": "Horn break",
-      "chords": ["Dm", "Dm", "Gm", "Gm"],
-      "drums": "onedrop", "skank": true, "bubble": true,
+      "chords": [
+        "Dm",
+        "Dm",
+        "Gm",
+        "Gm"
+      ],
+      "drums": "onedrop",
+      "skank": true,
+      "bubble": true,
       "horns": "r/1 A4/0.5 D5/0.5 F5/1 E5/0.5 D5/0.5 | C5/1.5 D5/0.5 r/2 | r/1 Bb4/0.5 D5/0.5 G5/1 F5/0.5 D5/0.5 | F5/1.5 G5/0.5 r/2"
     },
     {
       "name": "Verse 2",
-      "chords": ["Dm", "Dm", "Gm", "Gm", "Dm", "Dm", "Bb", "C"],
-      "drums": "onedrop", "skank": true, "bubble": true, "perc": "shaker",
+      "chords": [
+        "Dm",
+        "Dm",
+        "Gm",
+        "Gm",
+        "Dm",
+        "Dm",
+        "Bb",
+        "C"
+      ],
+      "drums": "onedrop",
+      "skank": true,
+      "bubble": true,
+      "perc": "shaker",
       "vocals": "@Verse 1",
       "lyrics": [
         "Winter on Lark Street and the snow coming down",
         "But the horns keep it warm in the heart of the town",
         "Brother on the hand drum, sister on the 'bone",
-        "Play it for the people and you never play alone"
-      ]
+        "Play it for the people, you never play alone"
+      ],
+      "syllables": "Win- ter on Lark Street and the snow _ com- ing down _ But the horns keep it warm in the heart of the town _ Bro- ther on the hand drum sis- ter on the bone _ Play it for the peo- ple you nev- er play a- lone"
     },
     {
       "name": "Chorus",
-      "chords": "@Chorus", "drums": "onedrop", "skank": true, "bubble": true, "perc": "shaker", "fill": true,
-      "vocals": "@Chorus", "horns": "@Chorus", "lyrics": "@Chorus"
+      "chords": "@Chorus",
+      "drums": "onedrop",
+      "skank": true,
+      "bubble": true,
+      "perc": "shaker",
+      "fill": true,
+      "vocals": "@Chorus",
+      "horns": "@Chorus",
+      "lyrics": "@Chorus",
+      "syllables": "@Chorus"
     },
     {
       "name": "Bridge",
-      "chords": ["Dm", "Dm", "Gm", "Gm", "Dm", "Dm", "Gm", "A"],
-      "drums": "steppers", "skank": true, "bubble": true, "perc": "afro", "fill": true,
+      "chords": [
+        "Dm",
+        "Dm",
+        "Gm",
+        "Gm",
+        "Dm",
+        "Dm",
+        "Gm",
+        "A"
+      ],
+      "drums": "steppers",
+      "skank": true,
+      "bubble": true,
+      "perc": "afro",
+      "fill": true,
       "vocals": "r/0.5 A4/0.5 C5/0.5 D5/0.5 D5/2 | r/4 | r/0.5 A4/0.5 C5/0.5 D5/0.5 D5/2 | r/4 | r/0.5 A4/0.5 C5/0.5 D5/0.5 D5/2 | r/4 | r/0.5 A4/0.5 C5/0.5 D5/0.5 D5/2 | r/4",
       "horns": "r/4 | r/1 F5/1 D5/2 | r/4 | r/1 G5/1 D5/2 | r/4 | r/1 F5/1 D5/2 | r/4 | r/1 E5/1 C#5/2",
       "lyrics": [
@@ -76,18 +164,36 @@
         "Music is love (horns: one love)",
         "Music is love (horns: one love)",
         "Music is love (horns: one love)"
-      ]
+      ],
+      "syllables": "Mu- sic is love Mu- sic is love Mu- sic is love Mu- sic is love "
     },
     {
       "name": "Chorus",
-      "chords": "@Chorus", "drums": "onedrop", "skank": true, "bubble": true, "perc": "shaker",
-      "vocals": "@Chorus", "horns": "@Chorus", "lyrics": "@Chorus"
+      "chords": "@Chorus",
+      "drums": "onedrop",
+      "skank": true,
+      "bubble": true,
+      "perc": "shaker",
+      "vocals": "@Chorus",
+      "horns": "@Chorus",
+      "lyrics": "@Chorus",
+      "syllables": "@Chorus"
     },
     {
       "name": "Outro",
-      "chords": ["Dm", "Gm", "Dm", "Dm"],
-      "drums": "onedrop", "end": true, "skank": true,
+      "chords": [
+        "Dm",
+        "Gm",
+        "Dm",
+        "Dm"
+      ],
+      "drums": "onedrop",
+      "end": true,
+      "skank": true,
       "horns": "r/1 A4/0.5 D5/0.5 F5/1 E5/0.5 D5/0.5 | C5/1.5 D5/0.5 r/2 | r/4 | D5/4"
     }
-  ]
+  ],
+  "voice": "Daniel",
+  "vocal_transpose": -12,
+  "horns_transpose": -12
 }

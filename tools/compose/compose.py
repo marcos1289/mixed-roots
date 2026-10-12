@@ -8,12 +8,16 @@ The song file holds the composition: chords per bar, horn and vocal melodies wri
 lyrics, and which grooves play where. This script supplies the playing:
 
   drums    one-drop or steppers patterns, played with the band's own drum hits
-  bass     a reggae line built from each bar's chord
-  guitar   the skank: chord stabs on 2 and 4 (plucked-string synthesis)
-  keys     the organ bubble on the offbeat 8ths
-  horns    the written line plus a harmony a third below, kept in the song's scale
-  vocals   a guide tone carrying the vocal melody (for the singer to learn, not to release)
-  other    shaker or afrobeat congas
+  bass     a reggae line built from each bar's chord, played with the band's real bass notes
+  guitar   the skank on 2 and 4, played with the band's real guitar chord stabs
+  keys     the organ bubble on the offbeat 8ths, played with the band's real keys stabs
+  horns    the written line plus a harmony a third below, played with their real horn notes
+  vocals   the lyrics sung on the melody (sing.py: a Mac voice re-pitched with WORLD)
+  other    shaker or afrobeat congas (synthesized)
+
+Band sounds come from every recording tools/stems has processed (samplers.py); a part
+falls back to a synthesized sound if no usable notes were found. --synth forces synth
+sounds everywhere, --no-vocals skips the singing (faster).
 
 Timing and accents come from a groove captured by tools/stems from a real recording, so
 the parts sit the way the band plays. Output goes to band-stems/<song>/ in the same layout
@@ -32,6 +36,7 @@ from scipy.signal import oaconvolve, butter, sosfilt
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "tools" / "stems"))
 import studio  # noqa: E402  (waveform images, stem levels, library page)
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 SR = 44100
 rng = np.random.default_rng(11)
@@ -91,12 +96,15 @@ def arrange(song):
     notes = {p: [] for p in PARTS}
     scale = {NOTE_NAMES[n] for n in song["harmony_scale"]}
     starts, beat = [], 0.0
+    chord_map, vocal_phrases = [], []
+    horns_tr, vocal_tr = song.get("horns_transpose", 0), song.get("vocal_transpose", 0)
     for sec in resolve(song["sections"]):
         starts.append((sec["name"], beat))
         bars = sec["chords"]
         for i, ch in enumerate(bars):
             b0 = beat + 4 * i
             root, tones = chord_tones(ch)
+            chord_map.append((b0, root, "minor" if (tones[1] - root) % 12 == 3 else "major"))
             last = i == len(bars) - 1
             end_bar = sec.get("end") and last
             fill_bar = sec.get("fill") and last
@@ -111,12 +119,15 @@ def arrange(song):
                 perc(notes["other"], b0, sec["perc"])
         for t, n, d in parse_line(sec.get("horns", "")):
             v = 100 if d >= 1 else 92
-            notes["horns"].append((beat + t, n, d * 0.92, v))
-            notes["horns"].append((beat + t, harmony(n, scale), d * 0.92, v - 12))
-        for t, n, d in parse_line(sec.get("vocals", "")):
-            notes["vocals"].append((beat + t, n, d * 0.95, 96))
+            notes["horns"].append((beat + t, n + horns_tr, d * 0.92, v))
+            notes["horns"].append((beat + t, harmony(n, scale) + horns_tr, d * 0.92, v - 12))
+        sung = parse_line(sec.get("vocals", ""))
+        for t, n, d in sung:
+            notes["vocals"].append((beat + t, n + vocal_tr, d * 0.95, 96))
+        if sung:
+            vocal_phrases.append((sec["syllables"], len(sung)))
         beat += 4 * len(bars)
-    return notes, starts, beat
+    return notes, starts, beat, chord_map, vocal_phrases
 
 
 def harmony(n, scale):
@@ -396,20 +407,49 @@ def reverb_ir(seconds=1.8):
     return ir / np.sqrt(np.sum(ir ** 2, axis=1, keepdims=True))
 
 
-def render(notes, bpm, kit, length_beats):
+def chord_at(chord_map, beat):
+    current = chord_map[0]
+    for c in chord_map:
+        if c[0] <= beat + 0.05:
+            current = c
+    return current
+
+
+def render(notes, bpm, kit, length_beats, chord_map, vocal_phrases, bank_samplers, voice):
     sec = 60 / bpm
     L = int((length_beats * sec + 3) * SR)
     bank = drum_bank(kit)
     bufs = {p: np.zeros((2, L)) for p in PARTS}
     pans = {36: 0, 37: 0.05, 38: 0.05, 42: 0.3, 46: 0.3, 48: -0.25, 45: 0.25, 49: -0.3, 70: 0.45,
             63: -0.4, 64: -0.2}
+    used = {}
     for part, ns in notes.items():
-        if part == "guitar":
+        sampler = bank_samplers.get(part)
+        if part in ("guitar", "keys"):
             by_time = {}
             for t, n, d, v in ns:
                 by_time.setdefault(round(t, 3), []).append((n, d, v))
-            for t, chord in by_time.items():
-                place(bufs[part], synth_skank([c[0] for c in chord], chord[0][1] * sec, chord[0][2]), t * sec, -0.35)
+            for k, (t, chord) in enumerate(sorted(by_time.items())):
+                y = None
+                if sampler is not None:
+                    _, root, quality = chord_at(chord_map, t)
+                    y = sampler.play(root, quality, chord[0][1] * sec + 0.05, chord[0][2], variant=k)
+                    used[part] = "band"
+                if y is None:
+                    y = synth_skank([c[0] for c in chord], chord[0][1] * sec, chord[0][2]) if part == "guitar" else \
+                        sum(np.pad(synth_organ(c[0], c[1] * sec, c[2]), (0, 0)) for c in chord[:1])
+                    used.setdefault(part, "synth")
+                place(bufs[part], y * (0.9 if part == "guitar" else 0.55), t * sec, -0.35 if part == "guitar" else 0.35)
+            continue
+        if part == "vocals" and voice:
+            import sing
+            cache, i = {}, 0
+            for syllables, count in vocal_phrases:
+                group = [(t * sec, d * sec, n) for t, n, d, v in ns[i:i + count]]
+                i += count
+                for t0, y in sing.sing_line(syllables, group, voice, cache):
+                    place(bufs[part], y * 1.6, t0)
+            used[part] = f"sung ({voice})"
             continue
         for t, n, d, v in ns:
             s = t * sec
@@ -417,11 +457,19 @@ def render(notes, bpm, kit, length_beats):
                 y = bank[n] * (v / 127) ** 1.3
                 place(bufs[part], y, s, pans.get(n, 0))
             elif part == "bass":
-                place(bufs[part], synth_bass(n, d * sec, v), s)
+                y = sampler.play(n, d * sec, v) if sampler is not None else None
+                used[part] = "band" if y is not None else "synth"
+                place(bufs[part], y * 0.6 if y is not None else synth_bass(n, d * sec, v), s)
             elif part == "keys":
                 place(bufs[part], synth_organ(n, d * sec, v), s, 0.35)
             elif part == "horns":
-                place(bufs[part], synth_horn(n, d * sec, v, trombone=n < 64), s, -0.2 if n >= 64 else 0.2)
+                y = sampler.play(n, d * sec, v, sustain=True) if sampler is not None else None
+                used[part] = "band" if y is not None else "synth"
+                if y is None:
+                    y = synth_horn(n, d * sec, v, trombone=n < 64)
+                else:
+                    y = y * 0.45
+                place(bufs[part], y, s, -0.2 if n >= 55 else 0.2)
             elif part == "vocals":
                 place(bufs[part], synth_voice(n, d * sec, v), s)
     ir = reverb_ir()
@@ -435,7 +483,7 @@ def render(notes, bpm, kit, length_beats):
     mix = sum(bufs.values())
     peak = np.abs(mix).max()
     scale = 0.89 / peak if peak > 0 else 1
-    return {p: b * scale for p, b in bufs.items()}, mix * scale
+    return {p: b * scale for p, b in bufs.items()}, mix * scale, used
 
 
 # ---------------------------------------------------------------- output
@@ -470,18 +518,30 @@ def song_sheet(song, starts, bpm):
 
 
 def main():
-    song_path = Path(sys.argv[1] if len(sys.argv) > 1 else REPO / "tools/compose/songs/common-ground.json")
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    song_path = Path(args[0] if args else REPO / "tools/compose/songs/common-ground.json")
     song = json.loads(song_path.read_text())
     bpm = song["bpm"]
     groove = json.loads((REPO / song["groove"]).read_text())
-    straight, starts, total_beats = arrange(song)
+    straight, starts, total_beats, chord_map, vocal_phrases = arrange(song)
     notes = apply_groove(straight, groove, bpm)
     slug = "Test song - " + song["title"]
     out = REPO / "band-stems" / slug
     for sub in ("stems", "midi", "wave", "sheet"):
         (out / sub).mkdir(parents=True, exist_ok=True)
     print(f"{song['title']}: {total_beats / 4:.0f} bars, {total_beats * 60 / bpm:.0f}s; rendering…")
-    stems, mix = render(notes, bpm, song["kit"], total_beats)
+    import samplers
+    recordings = [d.name for d in sorted((REPO / "band-stems").iterdir())
+                  if (d / "info.json").exists() and not d.name.startswith("Test song")]
+    plan = {"bass": [(r, "bass", "note") for r in recordings],
+            "horns": [(r, "horns", "note") for r in recordings],
+            "guitar": [(r, "guitar", "stab") for r in recordings],
+            "keys": [(r, "keys", "stab") for r in recordings]}
+    print("harvesting the band's notes and chords…")
+    bank_samplers = {} if "--synth" in sys.argv else samplers.build(REPO, plan)
+    stems, mix, used = render(notes, bpm, song["kit"], total_beats, chord_map, vocal_phrases, bank_samplers,
+                              None if "--no-vocals" in sys.argv else song.get("voice"))
+    print("sounds used:", used)
     sf.write(out / "mix.wav", mix.T, SR, subtype="PCM_24")
     for p, b in stems.items():
         sf.write(out / "stems" / f"{p}.wav", b.T, SR, subtype="PCM_24")
@@ -504,7 +564,7 @@ def main():
         "reconstruction_percent": 100.0,
         "stem_levels_db": {p: studio.stem_level(b) for p, b in stems.items()},
         "drum_hits": {}, "midi": sorted(f.name for f in (out / "midi").glob("*.mid")), "kit": {},
-        "phrases": [], "groove": groove,
+        "phrases": [], "groove": groove, "sounds": used,
     }
     (out / "info.json").write_text(json.dumps(info, indent=2))
     studio.report_page(out, slug, info, stems, mix)
