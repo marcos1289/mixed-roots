@@ -42,12 +42,12 @@ SR = 44100
 rng = np.random.default_rng(11)
 NOTE_NAMES = {"C": 0, "C#": 1, "Db": 1, "D": 2, "D#": 3, "Eb": 3, "E": 4, "F": 5, "F#": 6, "Gb": 6,
               "G": 7, "G#": 8, "Ab": 8, "A": 9, "A#": 10, "Bb": 10, "B": 11}
-PARTS = ["vocals", "drums", "bass", "guitar", "keys", "horns", "other"]
-GM_PROGRAM = {"bass": 33, "guitar": 28, "keys": 16, "horns": 61, "vocals": 54}
+PARTS = ["vocals", "drums", "bass", "guitar", "keys", "piano", "horns", "other"]
+GM_PROGRAM = {"bass": 33, "guitar": 28, "keys": 16, "piano": 0, "horns": 61, "vocals": 54}
 DRUM_NOTE = {"kick": 36, "snare": 37, "hat": 42, "open": 46, "tom_hi": 48, "tom_lo": 45, "crash": 49,
              "shaker": 70, "conga_hi": 63, "conga_lo": 64}
 POSITIONS = ["on the beat", "1st 16th (e)", "8th offbeat (&)", "3rd 16th (a)"]
-FEEL = {"drums": None, "bass": "kick", "guitar": "snare", "keys": "hat", "horns": "snare", "vocals": None,
+FEEL = {"drums": None, "bass": "kick", "guitar": "snare", "keys": "hat", "piano": "snare", "horns": "snare", "vocals": None,
         "other": "hat"}
 
 
@@ -134,6 +134,13 @@ def arrange(song):
                     notes["guitar"] += [(b0 + t, n, d, vel) for t, n, d, vel in styles.skank(v, sec.get("double_chop"))]
                     if last and sec.get("echo_last_skank", True):
                         dub["throws"].append(("guitar", b0 + 3, 0.6))
+            if sec.get("skank") and song.get("keys", "hammond+piano") == "hammond+piano":
+                pv = voicing(tones, 60)
+                pv = pv + [pv[0] + 12]                     # piano chop: triad plus top octave
+                if end_bar:
+                    notes["piano"] += [(b0, n, 1.5, 80) for n in pv]
+                else:
+                    notes["piano"] += [(b0 + t, n, 0.16, vel - 6) for t, n, d, vel in styles.skank(pv)]
             if sec.get("tenor_guitar") and not end_bar:
                 notes["guitar"] += [(b0 + t, n, d, v) for t, n, d, v in styles.tenor_guitar(50 + root % 12)]
             if sec.get("bubble") and not end_bar:
@@ -298,6 +305,81 @@ def synth_voice(n, dur, vel):
     return y * e * (vel / 127) * 0.22
 
 
+DRAWBAR_RATIOS = [0.5, 1.5, 1, 2, 3, 4, 5, 6, 8]       # 16' 5 1/3' 8' 4' 2 2/3' 2' 1 3/5' 1 1/3' 1'
+
+
+def hammond(pitches, dur, vel, registration="888000000", click=0.12, perc=False):
+    """Tonewheel organ: sine drawbars (each step ~3 dB), slightly detuned wheels, key click,
+    optional 2nd-harmonic percussion, gated envelope and a little drive."""
+    L = int((dur + 0.03) * SR)
+    t = np.arange(L) / SR
+    y = np.zeros(L)
+    for p in pitches:
+        f = hz(p)
+        for ratio, level in zip(DRAWBAR_RATIOS, registration):
+            lv = int(level)
+            fr = f * ratio * (1 + rng.normal(0, 0.0006))
+            if lv == 0 or fr > 15000:
+                continue
+            y += 10 ** ((lv - 8) * 3 / 20) * np.sin(2 * np.pi * fr * t + rng.uniform(0, 6.28))
+        if perc:
+            y += 0.7 * np.sin(2 * np.pi * 2 * f * t) * np.exp(-t * 9)
+    gate = np.ones(L)
+    a, r = int(0.004 * SR), int(0.018 * SR)
+    gate[:a] = np.linspace(0, 1, a)
+    cut = int(dur * SR)
+    gate[cut:] = np.linspace(1, 0, L - cut)[: L - cut] if cut < L else gate[cut:]
+    y = y * gate / max(1, len(pitches))
+    n = int(0.005 * SR)
+    y[:n] += sosfilt(butter(2, 2000, btype="high", fs=SR, output="sos"), rng.normal(0, 1, n)) * click
+    return np.tanh(1.4 * y) * (vel / 127) * 0.25
+
+
+def leslie(buf, rate=0.8, depth_ms=0.35):
+    """Slow (chorale) rotating speaker: opposed amplitude swirl and pitch wobble per side."""
+    L = buf.shape[1]
+    t = np.arange(L) / SR
+    out = np.empty_like(buf)
+    for ch, phase in ((0, 0.0), (1, np.pi)):
+        lfo = np.sin(2 * np.pi * rate * t + phase)
+        delay = (depth_ms / 1000 * SR) * (1 + lfo)
+        idx = np.clip(np.arange(L) - delay, 0, L - 1)
+        out[ch] = np.interp(idx, np.arange(L), buf[ch]) * (1 + 0.18 * lfo)
+    return out
+
+
+def fluid_render(notes, bpm, program, sf2, L):
+    """Render notes [(beat, pitch, beats, vel)] with a SoundFont preset (TinySoundFont)."""
+    try:
+        import tinysoundfont
+    except ImportError:
+        return None
+    if not notes or not Path(sf2).exists():
+        return None
+    sec = 60 / bpm
+    synth = tinysoundfont.Synth(samplerate=SR)
+    sfid = synth.sfload(str(sf2))
+    synth.program_select(0, sfid, 0, program)
+    events = []
+    for t, n, d, v in notes:
+        events.append((int(t * sec * SR), 1, int(n), int(v)))
+        events.append((int((t + d) * sec * SR), 0, int(n), 0))
+    events.sort(key=lambda e: (e[0], e[1]))
+    out = np.zeros((2, L), dtype=np.float32)
+    pos = 0
+    for when, on, n, v in events + [(L, -1, 0, 0)]:
+        when = min(when, L)
+        if when > pos:
+            buf = np.frombuffer(synth.generate(when - pos), dtype=np.float32).reshape(-1, 2).T
+            out[:, pos:when] = buf[:, :when - pos]
+            pos = when
+        if on == 1:
+            synth.noteon(0, n, v)
+        elif on == 0:
+            synth.noteoff(0, n)
+    return out.astype(np.float64)
+
+
 def noise_hit(dur, lo, hi, decay, amp):
     t = np.arange(int(dur * SR)) / SR
     y = sosfilt(butter(2, [lo, hi], btype="band", fs=SR, output="sos"), rng.normal(0, 1, len(t)))
@@ -403,7 +485,8 @@ def spring_ir(seconds=1.6):
 
 # Mix balance relative to the bass (roots_reggae_dub.md §8): bass loudest, kick and rim
 # close behind, vocal on top of the band, skank and organ small and thin.
-TARGET_DB = {"bass": 0, "drums": -2, "vocals": -3, "horns": -7, "guitar": -11, "keys": -12, "other": -13}
+TARGET_DB = {"bass": 0, "drums": -2, "vocals": -3, "horns": -7, "guitar": -11, "keys": -11, "piano": -12,
+             "other": -13}
 
 
 def active_rms(b):
@@ -414,7 +497,8 @@ def active_rms(b):
     return float(np.sqrt((on ** 2).mean())) if len(on) else 0.0
 
 
-def render(notes, bpm, kit, length_beats, chord_map, vocal_phrases, bank_samplers, voice, dub=None):
+def render(notes, bpm, kit, length_beats, chord_map, vocal_phrases, bank_samplers, voice, dub=None,
+           keys_mode="hammond+piano"):
     sec = 60 / bpm
     L = int((length_beats * sec + 3) * SR)
     bank = drum_bank(kit)
@@ -422,7 +506,14 @@ def render(notes, bpm, kit, length_beats, chord_map, vocal_phrases, bank_sampler
     pans = {36: 0, 37: 0.05, 38: 0.05, 42: 0.3, 46: 0.3, 48: -0.25, 45: 0.25, 49: -0.3, 70: 0.45,
             63: -0.4, 64: -0.2}
     used = {}
+    sf2 = Path(__file__).resolve().parent / "soundfonts" / "GeneralUser-GS.sf2"
     for part, ns in notes.items():
+        if part == "piano":
+            y = fluid_render(ns, bpm, 0, sf2, L)
+            if y is not None:
+                bufs["piano"] += y
+                used["piano"] = "GeneralUser GS grand"
+            continue
         sampler = bank_samplers.get(part)
         if part in ("guitar", "keys"):
             by_time = {}
@@ -432,8 +523,17 @@ def render(notes, bpm, kit, length_beats, chord_map, vocal_phrases, bank_sampler
                 y = None
                 if len(chord) == 1:                         # single notes: muted tenor guitar / bubble tail
                     n, d, v = chord[0]
-                    y = karplus(n, d * sec, v, damp=0.985, bright=0.6) if part == "guitar" else synth_organ(n, d * sec, v)
+                    y = karplus(n, d * sec, v, damp=0.985, bright=0.6) if part == "guitar" else \
+                        hammond([n], d * sec, v, registration="888000000")
                     place(bufs[part], y * (1.2 if part == "guitar" else 0.8), t * sec, 0.3 if part == "guitar" else 0.35)
+                    continue
+                if part == "keys" and keys_mode != "band":
+                    pitches_ = [c[0] for c in chord]
+                    rh = len(pitches_) >= 3 and min(pitches_) >= 60     # right-hand chop on 2 and 4
+                    y = hammond(pitches_, chord[0][1] * sec, chord[0][2],
+                                registration="888600000" if rh else "888000000", perc=rh)
+                    used[part] = "hammond"
+                    place(bufs[part], y, t * sec, 0.0)
                     continue
                 if sampler is not None:
                     _, root, quality = chord_at(chord_map, t)
@@ -479,9 +579,10 @@ def render(notes, bpm, kit, length_beats, chord_map, vocal_phrases, bank_sampler
     # tone shaping: dark round bass, thin bright skank, dark organ bubble
     bufs["bass"] = filt(bufs["bass"], "lowpass", 1500)
     bufs["guitar"] = filt(bufs["guitar"], "highpass", 350)
-    bufs["keys"] = filt(filt(bufs["keys"], "highpass", 120), "lowpass", 2600)
+    bufs["keys"] = leslie(filt(filt(bufs["keys"], "highpass", 90), "lowpass", 4500))
+    bufs["piano"] = filt(bufs["piano"], "highpass", 200)
     room, spring = reverb_ir(1.2), spring_ir()
-    wet = {"drums": ("spring", 0.14), "guitar": ("spring", 0.3), "keys": ("room", 0.12),
+    wet = {"drums": ("spring", 0.14), "guitar": ("spring", 0.3), "keys": ("room", 0.12), "piano": ("room", 0.14),
            "horns": ("room", 0.2), "vocals": ("room", 0.16), "other": ("room", 0.1)}
     throws = {}
     for part, start, amount in (dub or {}).get("throws", []):
@@ -495,6 +596,7 @@ def render(notes, bpm, kit, length_beats, chord_map, vocal_phrases, bank_sampler
             b = b + wet[p][1] * verb
         level = active_rms(b)
         bufs[p] = b * (10 ** (TARGET_DB[p] / 20) / level if level > 0 else 1)
+    bufs["keys"] = bufs["keys"] + bufs.pop("piano")      # one keys stem: organ bubble + piano chop
     mix = sum(bufs.values())
     peak = np.abs(mix).max()
     scale = 0.89 / peak if peak > 0 else 1
@@ -557,7 +659,7 @@ def main():
     print("harvesting the band's notes and chords…")
     bank_samplers = {} if "--synth" in sys.argv else samplers.build(REPO, plan)
     stems, mix, used = render(notes, bpm, song["kit"], total_beats, chord_map, vocal_phrases, bank_samplers,
-                              None if "--no-vocals" in sys.argv else song.get("voice"), dub)
+                              None if "--no-vocals" in sys.argv else song.get("voice"), dub, song.get("keys", "hammond+piano"))
     print("sounds used:", used)
     sf.write(out / "mix.wav", mix.T, SR, subtype="PCM_24")
     for p, b in stems.items():
@@ -576,7 +678,7 @@ def main():
     (out / "sheet" / f"{song['title']} - lyrics and chords.md").write_text(song_sheet(song, starts, bpm))
     (out / "groove.json").write_text(json.dumps(groove, indent=2))
     info = {
-        "title": slug, "source": str(song_path.relative_to(REPO)), "mode": "composed",
+        "title": slug, "source": str(song_path.resolve().relative_to(REPO)) if song_path.resolve().is_relative_to(REPO) else str(song_path), "mode": "composed",
         "duration": round(mix.shape[1] / SR, 1), "tempo": bpm, "key": song["key"], "key_confidence": 1.0,
         "reconstruction_percent": 100.0,
         "stem_levels_db": {p: studio.stem_level(b) for p, b in stems.items()},

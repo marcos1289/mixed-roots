@@ -44,12 +44,15 @@ OPTIONS = {
     "perc": ["none", "shekere", "afro"],
     "bridge": ["dub", "afro"],
     "melody_sync": [0.15, 0.3, 0.45],
+    "keys": ["hammond+piano", "hammond", "band"],
 }
 # Starting beliefs, as (wins, losses) pseudo-counts, from feedback so far: the 80 BPM one-drop
 # was "a little better, kinda slow"; Slightly Stoopid sits at 82-100 BPM (research notes).
 PRIOR = {
     "tempo": {"76": [0, 1], "82": [1, 1], "88": [1, 0], "94": [1, 0], "100": [0.5, 0.5]},
     "groove": {"onedrop": [0, 1], "stoopid": [1, 0], "marley_four": [0.5, 0]},
+    # "the keys need a more reggae feel" (batch 1 used the band's phone-recorded chord stabs)
+    "keys": {"hammond+piano": [2, 0], "hammond": [1, 0], "band": [0, 2]},
 }
 SLOW_GROOVES = {"onedrop": 86, "steppers": 88}     # these grooves don't go above this tempo
 NAMES = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"]
@@ -190,7 +193,7 @@ def build_song(params, lyrics, rng, title):
     return {
         "title": title, "subtitle": f"{g} groove, {params['tempo']} BPM, {params['key']}", "key": params["key"],
         "bpm": params["tempo"], "groove": base["groove"], "kit": base["kit"], "voice": "Daniel",
-        "vocal_transpose": 0, "horns_transpose": 0, "sections": sections,
+        "vocal_transpose": 0, "horns_transpose": 0, "sections": sections, "keys": params["keys"],
         "catchiness": {"verse": round(v1[2], 3), "chorus": round(ch[2], 3), "bridge": round(br[2], 3)},
     }
 

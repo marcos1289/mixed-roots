@@ -140,7 +140,7 @@ def main():
             p = v["params"]
             variants.append({"id": v["id"], "folder": v["folder"], "hook": seal(m4a.read_bytes(), "audio/mp4"),
                              "summary": f"{p['groove']} · {p['tempo']} BPM · {p['key']} · horns {p['horns']}"
-                                        f" · {p['perc']} perc · {p['bridge']} bridge"})
+                                        f" · {p['perc']} perc · {p['bridge']} bridge · keys {p.get('keys', 'band')}"})
         if len(variants) >= 2:
             ids = {v["id"] for v in variants}
             batches.append({"id": batch["id"], "created": batch["created"], "variants": variants,

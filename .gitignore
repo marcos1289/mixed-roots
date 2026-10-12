@@ -10,3 +10,4 @@ band-stems/
 tools/stems/.venv/
 tools/stems/models/
 .studio-password
+tools/compose/soundfonts/
