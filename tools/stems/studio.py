@@ -256,6 +256,29 @@ def cut(y, start, length, fade_out=0.03):
     return clip * (0.89 / peak) if peak > 0 else clip
 
 
+def trim_one_shot(clip, fade=0.015):
+    """Cut a one-shot where the sound rises again after its first decay (the next hit)."""
+    mono = clip.mean(axis=0)
+    frame = int(0.005 * SR)
+    # 20 ms RMS windows: short enough to see the next hit, long enough not to mistake a
+    # kick's own 40-60 Hz cycle for one.
+    win = int(0.02 * SR)
+    env = np.array([np.sqrt(np.mean(mono[i:i + win] ** 2)) for i in range(0, max(1, len(mono) - win), frame)])
+    if len(env) < 4 or env.max() <= 0:
+        return clip
+    peak = int(np.argmax(env))
+    decayed = np.where(env[peak:] < 0.3 * env[peak])[0]
+    if len(decayed):
+        start = max(peak + decayed[0], peak + int(0.06 * SR / frame))
+        again = np.where(env[start:] > 0.5 * env[peak])[0]
+        if len(again):
+            end = max(frame, (start + again[0]) * frame - int(0.01 * SR))
+            clip = clip[:, :end].copy()
+            n = min(int(fade * SR), clip.shape[1])
+            clip[:, -n:] *= np.linspace(1, 0, n)
+    return clip
+
+
 def build_kit(drums, hits, kit_dir, per_kind=4):
     """Keep the loudest hits that have nothing else ringing right after them."""
     kit_dir.mkdir(exist_ok=True)
@@ -275,7 +298,8 @@ def build_kit(drums, hits, kit_dir, per_kind=4):
         written[kind] = []
         for i, h in enumerate(cands[:per_kind], 1):
             name = f"{kind}_{i:02d}.wav"
-            sf.write(kit_dir / name, cut(drums, max(0, h["t"] - 0.004), length[kind]).T, SR, subtype="PCM_24")
+            clip = trim_one_shot(cut(drums, max(0, h["t"] - 0.004), length[kind]))
+            sf.write(kit_dir / name, clip.T, SR, subtype="PCM_24")
             written[kind].append(name)
     return written
 

@@ -10,10 +10,12 @@ public, the content isn't.
 
 The password is read from .studio-password at the repo root (gitignored; created with a
 random passphrase on first run). Change it by editing that file and re-running. The page
-lives at docs/<slug>/ where the slug, from tools/stems/private_studio.json, is unlisted;
+lives at docs/<slug>/ where the slug, from tools/stems/private_studio.json, is unlisted
+(that file also holds the PBKDF2 salt and a key fingerprint, neither of them secret);
 "titles" there maps song folder names to display names.
 """
 import base64
+import hashlib
 import json
 import os
 import secrets
@@ -60,20 +62,29 @@ def encode_aac(src, dest, kbps=192):
 def main():
     cfg = config()
     out = REPO / "docs" / cfg["slug"]
-    if out.exists():
-        shutil.rmtree(out)
-    (out / "f").mkdir(parents=True)
-    salt = secrets.token_bytes(16)
+    if "salt" not in cfg:
+        cfg["salt"] = base64.b64encode(secrets.token_bytes(16)).decode()
+    salt = base64.b64decode(cfg["salt"])
     key = PBKDF2HMAC(hashes.SHA256(), 32, salt, ITERATIONS).derive(password().encode())
+    key_check = hashlib.sha256(key).hexdigest()[:16]
+    if cfg.get("key_check") != key_check and out.exists():
+        shutil.rmtree(out)          # password changed: nothing old can be decrypted any more
+    cfg["key_check"] = key_check
+    CONFIG.write_text(json.dumps(cfg, indent=2) + "\n")
+    (out / "f").mkdir(parents=True, exist_ok=True)
     aes = AESGCM(key)
+    written = set()
     tmp = REPO / "band-stems" / ".publish-tmp"
     tmp.mkdir(exist_ok=True)
 
     def seal(data, mime):
         """Encrypt bytes to an opaque file; return the reference the page needs."""
-        name = secrets.token_hex(8)
-        nonce = secrets.token_bytes(12)
-        (out / "f" / name).write_bytes(nonce + aes.encrypt(nonce, data, None))
+        # Named by content so a republish reuses unchanged files instead of re-uploading them.
+        name = hashlib.sha256(key + data).hexdigest()[:20]
+        if not (out / "f" / name).exists():
+            nonce = secrets.token_bytes(12)
+            (out / "f" / name).write_bytes(nonce + aes.encrypt(nonce, data, None))
+        written.add(name)
         return {"id": name, "type": mime, "bytes": len(data)}
 
     songs = []
@@ -97,6 +108,8 @@ def main():
             m4a = tmp / (f.stem + ".m4a")
             encode_aac(f, m4a, 256)
             downloads.append({"group": "Phrases", "name": m4a.name, **seal(m4a.read_bytes(), "audio/mp4")})
+        for f in sorted((d / "sheet").glob("*")):
+            downloads.insert(0, {"group": "Song sheet", "name": f.name, **seal(f.read_bytes(), "text/markdown")})
         downloads.append({"group": "Groove", "name": "groove.json",
                           **seal((d / "groove.json").read_bytes(), "application/json")})
         songs.append({"title": cfg.get("titles", {}).get(info["title"], info["title"]), "tempo": info["tempo"], "key": info["key"],
@@ -108,7 +121,10 @@ def main():
     manifest = json.dumps({"songs": songs}).encode()
     nonce = secrets.token_bytes(12)
     (out / "manifest.bin").write_bytes(nonce + aes.encrypt(nonce, manifest, None))
-    params = {"salt": base64.b64encode(salt).decode(), "iterations": ITERATIONS}
+    for f in (out / "f").iterdir():
+        if f.name not in written:
+            f.unlink()
+    params = {"salt": cfg["salt"], "iterations": ITERATIONS}
     (out / "index.html").write_text(PAGE.read_text().replace("__PARAMS__", json.dumps(params)))
     total = sum(f.stat().st_size for f in out.rglob("*") if f.is_file())
     print(f"Published {len(songs)} songs to docs/{cfg['slug']}/ ({total / 1e6:.1f} MB encrypted)")
