@@ -61,7 +61,7 @@ def hz(m):
     return 440.0 * 2 ** ((m - 69) / 12)
 
 
-def sing_word(y, notes, glide_s=0.035, vib_depth=0.35, vib_rate=5.4):
+def sing_word(y, notes, glide_s=0.035, vib_depth=0.18, vib_rate=5.0):
     """notes: [(start_s, dur_s, midi)] relative to the word's first note. Returns audio at SR."""
     f0, t = pw.harvest(y, VOICE_SR, frame_period=FRAME_MS, f0_floor=60, f0_ceil=600)
     sp = pw.cheaptrick(y, f0, t, VOICE_SR)

@@ -92,166 +92,115 @@ def resolve(sections):
 # ---------------------------------------------------------------- arrangement -> notes
 
 def arrange(song):
-    """Return {part: [(beat, pitch, beats, velocity)]} plus section start beats."""
+    """Return notes per part plus section starts, total beats, chord map, vocal phrases,
+    the swing to use at each beat, and dub events."""
+    import styles
     notes = {p: [] for p in PARTS}
-    scale = {NOTE_NAMES[n] for n in song["harmony_scale"]}
     starts, beat = [], 0.0
-    chord_map, vocal_phrases = [], []
+    chord_map, vocal_phrases, swing_map, dub = [], [], [], {"throws": [], "drops": []}
     horns_tr, vocal_tr = song.get("horns_transpose", 0), song.get("vocal_transpose", 0)
     for sec in resolve(song["sections"]):
         starts.append((sec["name"], beat))
         bars = sec["chords"]
+        style = sec.get("drums")
+        swing_map.append((beat, beat + 4 * len(bars), styles.SWING.get(style, 50)))
+        riff = sec.get("bass", styles.BASS_FOR_DRUMS.get(style, "onedrop"))
+        for part in sec.get("drop", []):
+            dub["drops"].append((part, beat, beat + 4 * len(bars)))
         for i, ch in enumerate(bars):
             b0 = beat + 4 * i
             root, tones = chord_tones(ch)
-            chord_map.append((b0, root, "minor" if (tones[1] - root) % 12 == 3 else "major"))
+            major = (tones[1] - root) % 12 == 4
+            chord_map.append((b0, root, "major" if major else "minor"))
             last = i == len(bars) - 1
             end_bar = sec.get("end") and last
-            fill_bar = sec.get("fill") and last
-            drums(notes["drums"], b0, sec.get("drums"), fill_bar, end_bar, i)
-            if i + 1 >= sec.get("bass_from_bar", 1):
-                bass(notes["bass"], b0, root, tones, i, end_bar)
+            phrase_end = sec.get("fill") and last
+            if style:
+                for t, n, v in styles.drums(style, i, phrase_end, end_bar):
+                    notes["drums"].append((b0 + t, n, 0.1, v))
+            bass_root = 26 + (root - 2) % 12          # D1..C#2, i.e. riffs sit around D1-D2
+            if bass_root < 31:
+                bass_root += 12                        # keep the lowest notes playable: G1..F#2
+            if i + 1 >= sec.get("bass_from_bar", 1) and riff != "none":
+                if end_bar:
+                    notes["bass"].append((b0, bass_root, 3.0, 106))
+                else:
+                    notes["bass"] += [(b0 + t, n, d, v) for t, n, d, v in styles.bass(riff, i, bass_root, major)]
             if sec.get("skank"):
-                skank(notes["guitar"], b0, tones, end_bar)
+                v = voicing(tones, 62)
+                if end_bar:
+                    notes["guitar"] += [(b0, n, 1.5, 88) for n in v]
+                else:
+                    notes["guitar"] += [(b0 + t, n, d, vel) for t, n, d, vel in styles.skank(v, sec.get("double_chop"))]
+                    if last and sec.get("echo_last_skank", True):
+                        dub["throws"].append(("guitar", b0 + 3, 0.6))
+            if sec.get("tenor_guitar") and not end_bar:
+                notes["guitar"] += [(b0 + t, n, d, v) for t, n, d, v in styles.tenor_guitar(50 + root % 12)]
             if sec.get("bubble") and not end_bar:
-                bubble(notes["keys"], b0, root, tones)
+                notes["keys"] += [(b0 + t, n, d, v) for t, n, d, v in
+                                  styles.bubble(voicing(tones, 50), voicing(tones, 62))]
             if sec.get("perc") and not end_bar:
-                perc(notes["other"], b0, sec["perc"])
+                notes["other"] += [(b0 + t, n, 0.1, v) for t, n, v in styles.percussion(sec["perc"])]
+            if phrase_end:
+                dub["throws"].append(("drums", b0 + 3, 0.7))
         for t, n, d in parse_line(sec.get("horns", "")):
-            v = 100 if d >= 1 else 92
-            notes["horns"].append((beat + t, n + horns_tr, d * 0.92, v))
-            notes["horns"].append((beat + t, harmony(n, scale) + horns_tr, d * 0.92, v - 12))
+            # unison line plus the octave below; straight, short articulation
+            length = d * (0.85 if d >= 1.5 else 0.55)
+            notes["horns"].append((beat + t, n + horns_tr, length, 98))
+            notes["horns"].append((beat + t, n + horns_tr - 12, length, 90))
         sung = parse_line(sec.get("vocals", ""))
         for t, n, d in sung:
             notes["vocals"].append((beat + t, n + vocal_tr, d * 0.95, 96))
         if sung:
             vocal_phrases.append((sec["syllables"], len(sung)))
+        for when, part, amount in sec.get("throws", []):
+            dub["throws"].append((part, beat + when, amount))
         beat += 4 * len(bars)
-    return notes, starts, beat, chord_map, vocal_phrases
-
-
-def harmony(n, scale):
-    """A third below that stays in the scale (minor third preferred)."""
-    for step in (3, 4):
-        if (n - step) % 12 in scale:
-            return n - step
-    return n - 3
-
-
-def drums(out, b0, style, fill, end, bar):
-    if not style:
-        return
-    add = lambda t, k, v: out.append((b0 + t, DRUM_NOTE[k], 0.1, v))
-    if end:
-        add(0, "kick", 115); add(0, "crash", 110); add(0, "snare", 100)
-        return
-    if bar == 0:
-        add(0, "crash", 92)
-    if style == "onedrop":
-        add(2, "kick", 112); add(2, "snare", 104)
-        for k in range(8):
-            t = k * 0.5
-            if fill and t >= 3:
-                break
-            open_hat = k == 7 and bar % 4 == 3
-            add(t, "open" if open_hat else "hat", 96 if k % 2 else 70)
-    elif style == "steppers":
-        for q in range(4):
-            add(q, "kick", 108 if q in (0, 2) else 96)
-        add(2, "snare", 104)
-        for k in range(16):
-            t = k * 0.25
-            if fill and t >= 3:
-                break
-            add(t, "hat", (90, 50, 78, 50)[k % 4])
-    if fill:
-        for t, k in ((3, "snare"), (3.25, "snare"), (3.5, "tom_hi"), (3.75, "tom_lo")):
-            add(t, k, 96)
-
-
-BASS_RHYTHMS = [
-    [(0.0, 0, 0.9), (1.0, 0, 0.4), (1.5, 7, 0.4), (2.5, 0, 0.4), (3.0, 3, 0.45), (3.5, 7, 0.4)],
-    [(0.0, 0, 1.4), (1.5, 7, 0.4), (2.0, 12, 0.4), (2.5, 10, 0.4), (3.0, 7, 0.9)],
-]
-
-
-def bass(out, b0, root, tones, bar, end):
-    base = 36 + (root - 0) % 12          # C2..B2
-    if base > 43:                         # keep the line between E1 and G2
-        base -= 12
-    if end:
-        out.append((b0, base, 3.5, 108))
-        return
-    third = (tones[1] - root) % 12
-    for t, iv, d in BASS_RHYTHMS[bar % 2]:
-        if iv == 3:
-            iv = third
-        if iv == 10 and len(tones) < 4 and third == 4:
-            iv = 7
-        out.append((b0 + t, base + iv, d, 100 if t in (0.0, 2.0) else 88))
+    return notes, starts, beat, chord_map, vocal_phrases, swing_map, dub
 
 
 def voicing(tones, low=62):
-    """Close triad voicing starting at or above `low` (D4)."""
-    vs = []
-    for pc in tones[:3]:
-        n = low + (pc - low) % 12
-        vs.append(n)
-    return sorted(vs)
-
-
-def skank(out, b0, tones, end):
-    hits = [0] if end else [1, 3]
-    for q in hits:
-        for n in voicing(tones):
-            out.append((b0 + q, n, 1.5 if end else 0.18, 84))
-
-
-def bubble(out, b0, root, tones):
-    v = voicing(tones, 55)
-    for k in range(4):
-        t = k + 0.5
-        chord = v if k % 2 == 0 else [x + 12 for x in v[1:]]
-        for n in chord:
-            out.append((b0 + t, n, 0.22, 64 if k % 2 else 74))
-
-
-def perc(out, b0, style):
-    if style == "shaker":
-        for k in range(16):
-            out.append((b0 + k * 0.25, DRUM_NOTE["shaker"], 0.1, (70, 40, 60, 40)[k % 4]))
-    elif style == "afro":
-        for t, k, v in ((0.75, "conga_lo", 90), (1.5, "conga_hi", 84), (2.0, "conga_hi", 70),
-                        (2.75, "conga_lo", 92), (3.5, "conga_hi", 88), (3.75, "conga_hi", 64)):
-            out.append((b0 + t, DRUM_NOTE[k], 0.2, v))
-        for k in range(16):
-            out.append((b0 + k * 0.25, DRUM_NOTE["shaker"], 0.1, (64, 36, 54, 36)[k % 4]))
+    """Close triad voicing starting at or above `low`."""
+    return sorted(low + (pc - low) % 12 for pc in tones[:3])
 
 
 # ---------------------------------------------------------------- groove
 
-def apply_groove(notes, groove, bpm):
-    """Offset each note by the captured push/pull for its 16th position, and humanize a little."""
+def apply_groove(notes, groove, bpm, swing_map):
+    """Swing the offbeat 8ths per section, add the captured push/pull, humanize a little."""
     table = groove.get("positions", {})
     beat_ms = 60000 / bpm
     out = {}
     kind_of = {36: "kick", 37: "snare", 38: "snare", 42: "hat", 46: "hat", 70: "hat"}
+
+    def swing_at(t):
+        for a, b, s in swing_map:
+            if a <= t < b:
+                return s
+        return 50
+
     for part, ns in notes.items():
         moved = []
-        shared = {}   # notes struck together (chords, horn harmony) move together
+        shared = {}   # notes struck together (chords, horn octaves) move together
         for t, n, d, v in ns:
+            frac = t % 1
+            s = swing_at(t)
+            shift = 0.0
+            if abs(frac - 0.5) < 1e-6:
+                shift = (s - 50) / 100                         # offbeat 8th toward the triplet
+            elif abs(frac - 0.75) < 1e-6:
+                shift = (s - 50) / 100 * 0.5                   # last 16th follows partway
             kind = kind_of.get(n, "snare") if part in ("drums", "other") else FEEL[part]
             off_ms = 0.0
-            pos = POSITIONS[round(t * 4) % 4]
-            cell = table.get(kind or "", {}).get(pos) if kind else None
+            cell = table.get(kind or "", {}).get(POSITIONS[round(t * 4) % 4]) if kind else None
             if cell:
-                off_ms = max(-25.0, min(25.0, cell["median_offset_ms"]))
+                off_ms = max(-15.0, min(15.0, cell["median_offset_ms"]))
             if part in ("drums", "other"):
                 off_ms += rng.normal(0, 4)
             else:
-                off_ms += shared.setdefault(t, rng.normal(0, 6))
-            v = int(np.clip(v + rng.normal(0, 5), 20, 127))
-            moved.append((max(0.0, t + off_ms / beat_ms), n, d, v))
+                off_ms += shared.setdefault(t, rng.normal(0, 5))
+            v = int(np.clip(v + rng.normal(0, 4), 20, 127))
+            moved.append((max(0.0, t + shift + off_ms / beat_ms), n, d, v))
         out[part] = moved
     return out
 
@@ -387,6 +336,7 @@ def drum_bank(kit):
         42: hat * 0.35, 46: open_hat * 0.35, 48: tom(160), 45: tom(110),
         49: noise_hit(1.6, 3000, 16000, 2.6, 0.35),
         70: noise_hit(0.07, 5000, 14000, 55, 0.25), 63: conga(330, 0.5), 64: conga(220, 0.55),
+        62: conga(390, 0.35) + np.pad(noise_hit(0.08, 1500, 7000, 70, 0.4), (0, int(0.3 * SR) - int(0.08 * SR))),
     }
 
 
@@ -415,7 +365,56 @@ def chord_at(chord_map, beat):
     return current
 
 
-def render(notes, bpm, kit, length_beats, chord_map, vocal_phrases, bank_samplers, voice):
+def filt(y, kind, cutoff, order=2):
+    return sosfilt(butter(order, cutoff, btype=kind, fs=SR, output="sos"), y, axis=-1)
+
+
+def dub_echo(dry, throws, sec, L):
+    """Tape-style echo thrown onto single moments: dotted-8th repeats, 55% feedback, each repeat
+    darker and thinner, as on a Space Echo with the send opened for one hit."""
+    out = np.zeros((2, L))
+    delay = int(0.75 * sec * SR)
+    for start_beat, amount in throws:
+        a = int(start_beat * sec * SR)
+        b = min(L, a + int(0.45 * SR))
+        if a >= L:
+            continue
+        x = dry[:, a:b] * amount
+        for k in range(1, 7):
+            x = filt(filt(x, "lowpass", 3500), "highpass", 250) * 0.55
+            s = a + k * delay
+            if s >= L:
+                break
+            e = min(L, s + x.shape[1])
+            pan = 1 if k % 2 else -1          # repeats ping-pong a little
+            out[0, s:e] += x[0, :e - s] * (1 - 0.3 * pan)
+            out[1, s:e] += x[1, :e - s] * (1 + 0.3 * pan)
+    return out
+
+
+def spring_ir(seconds=1.6):
+    """Dark, boingy spring-tank style reverb: band-limited decaying noise with a flutter."""
+    t = np.arange(int(seconds * SR)) / SR
+    flutter = 1 + 0.35 * np.sin(2 * np.pi * 9 * t)
+    ir = np.stack([rng.normal(0, 1, len(t)), rng.normal(0, 1, len(t))]) * np.exp(-t * 2.6) * flutter
+    ir = filt(filt(ir, "highpass", 300), "lowpass", 4500)
+    return ir / np.sqrt(np.sum(ir ** 2, axis=1, keepdims=True))
+
+
+# Mix balance relative to the bass (roots_reggae_dub.md §8): bass loudest, kick and rim
+# close behind, vocal on top of the band, skank and organ small and thin.
+TARGET_DB = {"bass": 0, "drums": -2, "vocals": -3, "horns": -7, "guitar": -11, "keys": -12, "other": -13}
+
+
+def active_rms(b):
+    mono = b.mean(axis=0)
+    frames = mono[: len(mono) // 2048 * 2048].reshape(-1, 2048)
+    rms = np.sqrt((frames ** 2).mean(axis=1))
+    on = rms[rms > rms.max() * 0.03] if rms.max() > 0 else rms
+    return float(np.sqrt((on ** 2).mean())) if len(on) else 0.0
+
+
+def render(notes, bpm, kit, length_beats, chord_map, vocal_phrases, bank_samplers, voice, dub=None):
     sec = 60 / bpm
     L = int((length_beats * sec + 3) * SR)
     bank = drum_bank(kit)
@@ -431,6 +430,11 @@ def render(notes, bpm, kit, length_beats, chord_map, vocal_phrases, bank_sampler
                 by_time.setdefault(round(t, 3), []).append((n, d, v))
             for k, (t, chord) in enumerate(sorted(by_time.items())):
                 y = None
+                if len(chord) == 1:                         # single notes: muted tenor guitar / bubble tail
+                    n, d, v = chord[0]
+                    y = karplus(n, d * sec, v, damp=0.985, bright=0.6) if part == "guitar" else synth_organ(n, d * sec, v)
+                    place(bufs[part], y * (1.2 if part == "guitar" else 0.8), t * sec, 0.3 if part == "guitar" else 0.35)
+                    continue
                 if sampler is not None:
                     _, root, quality = chord_at(chord_map, t)
                     y = sampler.play(root, quality, chord[0][1] * sec + 0.05, chord[0][2], variant=k)
@@ -472,14 +476,25 @@ def render(notes, bpm, kit, length_beats, chord_map, vocal_phrases, bank_sampler
                 place(bufs[part], y, s, -0.2 if n >= 55 else 0.2)
             elif part == "vocals":
                 place(bufs[part], synth_voice(n, d * sec, v), s)
-    ir = reverb_ir()
-    wet = {"drums": 0.08, "guitar": 0.22, "keys": 0.15, "horns": 0.25, "vocals": 0.2, "other": 0.12}
-    gain = {"vocals": 0.9, "drums": 1.0, "bass": 1.0, "guitar": 0.55, "keys": 0.55, "horns": 0.8, "other": 0.6}
+    # tone shaping: dark round bass, thin bright skank, dark organ bubble
+    bufs["bass"] = filt(bufs["bass"], "lowpass", 1500)
+    bufs["guitar"] = filt(bufs["guitar"], "highpass", 350)
+    bufs["keys"] = filt(filt(bufs["keys"], "highpass", 120), "lowpass", 2600)
+    room, spring = reverb_ir(1.2), spring_ir()
+    wet = {"drums": ("spring", 0.14), "guitar": ("spring", 0.3), "keys": ("room", 0.12),
+           "horns": ("room", 0.2), "vocals": ("room", 0.16), "other": ("room", 0.1)}
+    throws = {}
+    for part, start, amount in (dub or {}).get("throws", []):
+        throws.setdefault(part, []).append((start, amount))
     for p, b in bufs.items():
-        if wet.get(p):
+        if p in throws:
+            b = b + dub_echo(b, throws[p], sec, L)
+        if p in wet:
+            ir = spring if wet[p][0] == "spring" else room
             verb = np.stack([oaconvolve(b[0], ir[0])[:L], oaconvolve(b[1], ir[1])[:L]])
-            b = b + wet[p] * verb
-        bufs[p] = b * gain[p]
+            b = b + wet[p][1] * verb
+        level = active_rms(b)
+        bufs[p] = b * (10 ** (TARGET_DB[p] / 20) / level if level > 0 else 1)
     mix = sum(bufs.values())
     peak = np.abs(mix).max()
     scale = 0.89 / peak if peak > 0 else 1
@@ -523,8 +538,10 @@ def main():
     song = json.loads(song_path.read_text())
     bpm = song["bpm"]
     groove = json.loads((REPO / song["groove"]).read_text())
-    straight, starts, total_beats, chord_map, vocal_phrases = arrange(song)
-    notes = apply_groove(straight, groove, bpm)
+    straight, starts, total_beats, chord_map, vocal_phrases, swing_map, dub = arrange(song)
+    for part, a, b in dub["drops"]:                     # dub drop-outs: parts leave the mix
+        straight[part] = [x for x in straight[part] if not (a <= x[0] < b)]
+    notes = apply_groove(straight, groove, bpm, swing_map)
     slug = "Test song - " + song["title"]
     out = REPO / "band-stems" / slug
     for sub in ("stems", "midi", "wave", "sheet"):
@@ -540,7 +557,7 @@ def main():
     print("harvesting the band's notes and chords…")
     bank_samplers = {} if "--synth" in sys.argv else samplers.build(REPO, plan)
     stems, mix, used = render(notes, bpm, song["kit"], total_beats, chord_map, vocal_phrases, bank_samplers,
-                              None if "--no-vocals" in sys.argv else song.get("voice"))
+                              None if "--no-vocals" in sys.argv else song.get("voice"), dub)
     print("sounds used:", used)
     sf.write(out / "mix.wav", mix.T, SR, subtype="PCM_24")
     for p, b in stems.items():
